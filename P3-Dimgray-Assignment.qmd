@@ -1,0 +1,334 @@
+---
+title: "P3-Dimgray-Assignment"
+author: "Jared Teo, Nicholas Poh, Oliver Choy, WuJie, Nicole, Kurt"
+format: html
+---
+
+# Introduction
+
+```{r}
+#| label: required-packages
+#| message: false
+
+library(tidyverse)
+library(gt)
+library(palmerpenguins)
+library(ggbeeswarm)
+library(ggmosaic)
+library(ggplot2)
+library(dplyr)
+library(readr)
+
+```
+
+# Data
+```{r}
+#| label: inflation-rate
+#| message: false
+
+inflation_rate <- read_csv("Consumer_price_index_monthly.csv")
+
+# Filter the data
+filtered_data <- inflation_rate %>%
+  filter(`Data Series` %in% 
+  c("Food", "Food Excl Food Serving Services", "Clothing & Footwear","Housing & Utilities","Household Durables & Services","Health Care","Transport","Communication", "Recreation & Culture", "Education", "Miscellaneous Goods & Services", "All Items")) %>%
+  select(`Data Series`, `2023 Jan`, `2023 Feb`,`2023 Mar`, `2023 Apr`,`2023 May`, `2023 Jun`, `2023 Jul`, `2023 Aug`,`2023 Sep`, `2023 Oct`,`2023 Nov`, `2023 Dec`)
+  
+
+filtered_data
+```
+
+
+# Filter and plot "All Items" data
+```{r}
+#| label: filter-all-items
+#| fig-height: 4
+#| 
+#| message: false
+#| 
+filer_all_items <- filtered_data %>%
+  filter(`Data Series` == "All Items") %>%
+  pivot_longer(cols = -`Data Series`, names_to = "month", values_to = "inflation_rate")
+
+# Convert month to proper date format
+filer_all_items <- filer_all_items %>%
+  mutate(month = as.POSIXct(strptime(paste(month, "01"), "%Y %b %d")))
+
+ggplot(filer_all_items, aes(x = month, y = inflation_rate, group=1)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Line graph of 'All Items' inflation percentage change through 2023",
+    x="Month", 
+    y="Value",
+    caption = "Source: Department of Statistics Singapore") +
+  theme_classic()
+```
+
+
+# Filter and plot "Food" data
+```{r}
+#| label: filter-Food
+#| fig-height: 4
+#| message: false
+#| 
+filter_food <- filtered_data %>%
+  filter(`Data Series` == "Food") %>%
+  pivot_longer(cols = -`Data Series`, names_to = "month", values_to = "inflation_rate")
+
+# Convert month to proper date format
+filter_food <- filter_food %>%
+  mutate(month = as.POSIXct(strptime(paste(month, "01"), "%Y %b %d")))
+
+ggplot(filter_food, aes(x = month, y = inflation_rate, group=1)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Line graph of 'Food' inflation percentage change through 2023",
+    x="Month", 
+    y="Value",
+    caption = "Source: Department of Statistics Singapore") +
+  theme_classic()
+```
+
+# Filter and plot "Food Excl Food Serving Services" data
+```{r}
+#| label: filter-Food-ex
+#| fig-height: 4
+#| message: false
+#| 
+filter_food_ex <- filtered_data %>%
+  filter(`Data Series` == "Food Excl Food Serving Services") %>%
+  pivot_longer(cols = -`Data Series`, names_to = "month", values_to = "inflation_rate")
+
+# Convert month to proper date format
+filter_food_ex <- filter_food_ex %>%
+  mutate(month = as.POSIXct(strptime(paste(month, "01"), "%Y %b %d")))
+
+ggplot(filter_food_ex, aes(x = month, y = inflation_rate, group=1)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Line graph of 'Food Excl Food Serving Services' inflation percentage change through 2023",
+    x="Month", 
+    y="Value",
+    caption = "Source: Department of Statistics Singapore") +
+  theme_classic()
+```
+
+# Filter and plot "Clothing & Footwear" data
+```{r}
+#| label: filter-cloths
+#| fig-height: 4
+#| message: false
+#| 
+filer_cloths <- filtered_data %>%
+  filter(`Data Series` == "Clothing & Footwear") %>%
+  pivot_longer(cols = -`Data Series`, names_to = "month", values_to = "inflation_rate")
+
+# Convert month to proper date format
+filer_cloths <- filer_cloths %>%
+  mutate(month = as.POSIXct(strptime(paste(month, "01"), "%Y %b %d")))
+
+ggplot(filer_cloths, aes(x = month, y = inflation_rate, group=1)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Line graph of 'Clothing & Footwear' inflation percentage change through 2023",
+    x="Month", 
+    y="Value",
+    caption = "Source: Department of Statistics Singapore") +
+  theme_classic()
+```
+
+# Filter and plot "Housing & Utilities" data
+```{r}
+#| label: filter-house
+#| message: false
+#| 
+filter_house <- filtered_data %>%
+  filter(`Data Series` == "Housing & Utilities") %>%
+  pivot_longer(cols = -`Data Series`, names_to = "month", values_to = "inflation_rate")
+
+# Convert month to proper date format
+filter_house <- filter_house %>%
+  mutate(month = as.POSIXct(strptime(paste(month, "01"), "%Y %b %d")))
+
+ggplot(filter_house, aes(x = month, y = inflation_rate, group=1)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Line graph of 'Housing & Utilities' inflation percentage change through 2023",
+    x="Month", 
+    y="Value",
+    caption = "Source: Department of Statistics Singapore") +
+  theme_classic()
+```
+
+# Filter and plot "Household Durables & Services" data
+```{r}
+#| label: filter-household
+#| message: false
+#| 
+filter_household <- filtered_data %>%
+  filter(`Data Series` == "Household Durables & Services") %>%
+  pivot_longer(cols = -`Data Series`, names_to = "month", values_to = "inflation_rate")
+
+# Convert month to proper date format
+filter_household <- filter_household %>%
+  mutate(month = as.POSIXct(strptime(paste(month, "01"), "%Y %b %d")))
+
+ggplot(filter_household, aes(x = month, y = inflation_rate, group=1)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Line graph of 'Household Durables & Services' inflation percentage change through 2023",
+    x="Month", 
+    y="Value",
+    caption = "Source: Department of Statistics Singapore") +
+  theme_classic()
+```
+
+# Filter and plot "Healthcare" data
+```{r}
+#| label: filter-healthcare
+#| message: false
+#| 
+filter_healthcare <- filtered_data %>%
+  filter(`Data Series` == "Health Care") %>%
+  pivot_longer(cols = -`Data Series`, names_to = "month", values_to = "inflation_rate")
+
+# Convert month to proper date format
+filter_healthcare <- filter_healthcare %>%
+  mutate(month = as.POSIXct(strptime(paste(month, "01"), "%Y %b %d")))
+
+ggplot(filter_healthcare, aes(x = month, y = inflation_rate, group=1)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Line graph of 'Healthcare' inflation percentage change through 2023",
+    x="Month", 
+    y="Value",
+    caption = "Source: Department of Statistics Singapore") +
+  theme_classic()
+```
+
+# Filter and plot "Transport" data
+```{r}
+#| label: filter-transport
+#| message: false
+#| 
+filter_transport <- filtered_data %>%
+  filter(`Data Series` == "Transport") %>%
+  pivot_longer(cols = -`Data Series`, names_to = "month", values_to = "inflation_rate")
+
+# Convert month to proper date format
+filter_transport <- filter_transport %>%
+  mutate(month = as.POSIXct(strptime(paste(month, "01"), "%Y %b %d")))
+
+ggplot(filter_transport, aes(x = month, y = inflation_rate, group=1)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Line graph of 'Transport' inflation percentage change through 2023",
+    x="Month", 
+    y="Value",
+    caption = "Source: Department of Statistics Singapore") +
+  theme_classic()
+```
+
+# Filter and plot "Communication" data
+```{r}
+#| label: filter-communication
+#| message: false
+#| 
+filter_communication <- filtered_data %>%
+  filter(`Data Series` == "Communication") %>%
+  pivot_longer(cols = -`Data Series`, names_to = "month", values_to = "inflation_rate")
+
+# Convert month to proper date format
+filter_communication <- filter_communication %>%
+  mutate(month = as.POSIXct(strptime(paste(month, "01"), "%Y %b %d")))
+
+ggplot(filter_communication, aes(x = month, y = inflation_rate, group=1)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Line graph of 'Communication' inflation percentage change through 2023",
+    x="Month", 
+    y="Value",
+    caption = "Source: Department of Statistics Singapore") +
+  theme_classic()
+```
+
+# Filter and plot "Recreation & Culture" data
+```{r}
+#| label: filter-recreation
+#| message: false
+#| 
+filter_recreation <- filtered_data %>%
+  filter(`Data Series` == "Recreation & Culture") %>%
+  pivot_longer(cols = -`Data Series`, names_to = "month", values_to = "inflation_rate")
+
+# Convert month to proper date format
+filter_recreation <- filter_recreation %>%
+  mutate(month = as.POSIXct(strptime(paste(month, "01"), "%Y %b %d")))
+
+ggplot(filter_recreation, aes(x = month, y = inflation_rate, group=1)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Line graph of 'Recreation & Culture' inflation percentage change through 2023",
+    x="Month", 
+    y="Value",
+    caption = "Source: Department of Statistics Singapore") +
+  theme_classic()
+```
+
+# Filter and plot "Education" data
+```{r}
+#| label: filter-education
+#| message: false
+#| 
+filter_education <- filtered_data %>%
+  filter(`Data Series` == "Education") %>%
+  pivot_longer(cols = -`Data Series`, names_to = "month", values_to = "inflation_rate")
+
+# Convert month to proper date format
+filter_education <- filter_education %>%
+  mutate(month = as.POSIXct(strptime(paste(month, "01"), "%Y %b %d")))
+
+ggplot(filter_education, aes(x = month, y = inflation_rate, group=1)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Line graph of 'Education' inflation percentage change through 2023",
+    x="Month", 
+    y="Value",
+    caption = "Source: Department of Statistics Singapore") +
+  theme_classic()
+```
+
+# Filter and plot "Miscellaneous Goods & Services" data
+```{r}
+#| label: filter-miscellaneous
+#| message: false
+#| 
+filter_miscellaneous <- filtered_data %>%
+  filter(`Data Series` == "Miscellaneous Goods & Services") %>%
+  pivot_longer(cols = -`Data Series`, names_to = "month", values_to = "inflation_rate")
+
+# Convert month to proper date format
+filter_miscellaneous <- filter_miscellaneous %>%
+  mutate(month = as.POSIXct(strptime(paste(month, "01"), "%Y %b %d")))
+
+ggplot(filter_miscellaneous, aes(x = month, y = inflation_rate, group=1)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Line graph of 'Miscellaneous Goods & Services' inflation percentage change through 2023",
+    x="Month", 
+    y="Value",
+    caption = "Source: Department of Statistics Singapore") +
+  theme_classic()
+```
