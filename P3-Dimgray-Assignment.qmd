@@ -4,7 +4,7 @@ author: "Jared Teo, Nicholas Poh, Oliver Choy, WuJie, Nicole, Kurt"
 format: html
 ---
 
-# Introduction
+# Required Packages
 
 ```{r}
 #| label: required-packages
@@ -26,18 +26,42 @@ library(readr)
 #| label: inflation-rate
 #| message: false
 
-inflation_rate <- read_csv("Consumer_price_index_monthly.csv")
+inflation_rate <- read_csv("M212911.csv", skip = 10)
 
-# Filter the data
-filtered_data <- inflation_rate %>%
-  filter(`Data Series` %in% 
-  c("Food", "Food Excl Food Serving Services", "Clothing & Footwear","Housing & Utilities","Household Durables & Services","Health Care","Transport","Communication", "Recreation & Culture", "Education", "Miscellaneous Goods & Services", "All Items")) %>%
-  select(`Data Series`, `2023 Jan`, `2023 Feb`,`2023 Mar`, `2023 Apr`,`2023 May`, `2023 Jun`, `2023 Jul`, `2023 Aug`,`2023 Sep`, `2023 Oct`,`2023 Nov`, `2023 Dec`)
-  
+inflation_rate <- inflation_rate[1:152,]
 
-filtered_data
+inflation_rate 
 ```
 
+```{r}
+#| label: inflation-rate-plot
+#| fig-height: 6
+#| fig-width: 10
+#| message: false
+# Filter the data
+filtered_data <- inflation_rate |>
+  filter(`Data Series` %in% 
+  c("Food", "Food Excl Food Serving Services", "Clothing & Footwear","Housing & Utilities","Household Durables & Services","Health Care","Transport","Communication", "Recreation & Culture", "Education", "Miscellaneous Goods & Services", "All Items")) |>
+  select(`Data Series`, `2023 Jan`, `2023 Feb`,`2023 Mar`, `2023 Apr`,`2023 May`, `2023 Jun`, `2023 Jul`, `2023 Aug`,`2023 Sep`, `2023 Oct`,`2023 Nov`, `2023 Dec`)
+
+filtered_month_data <- filtered_data |>
+  pivot_longer(cols = -`Data Series`, names_to = "month", values_to = "inflation_rate")
+
+# Convert month to proper date format
+filtered_month_data <- filtered_month_data |>
+  mutate(month = as.POSIXct(strptime(paste(month, "01"), "%Y %b %d")))
+
+ggplot(filtered_month_data, aes(month, inflation_rate, group = `Data Series`)) +
+  geom_point(aes(color = month, size = inflation_rate)) +
+  geom_path(aes(color = month))+
+  geom_text(
+    aes(label = `Data Series`),
+    slice_max(filtered_month_data, month), 
+    vjust = 1,
+    nudge_y = 2
+  )
+
+```
 
 # Filter and plot "All Items" data
 ```{r}
@@ -332,3 +356,4 @@ ggplot(filter_miscellaneous, aes(x = month, y = inflation_rate, group=1)) +
     caption = "Source: Department of Statistics Singapore") +
   theme_classic()
 ```
+
