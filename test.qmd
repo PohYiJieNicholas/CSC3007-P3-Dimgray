@@ -1,0 +1,163 @@
+```{r}
+# Load necessary libraries
+library(tidyverse)
+
+# Read the data
+inflation_rate <- read_csv("M212941.csv", skip = 9)
+
+# Filter the data to include only the first 152 rows
+inflation_rate <- inflation_rate[1:152,]
+
+# Filter the data for the years 2021, 2022, and 2023
+filtered_data <- inflation_rate %>%
+  filter(`Data Series` %in% c("Food", "Food Excl Food Serving Services", "Clothing & Footwear", "Housing & Utilities", "Household Durables & Services", "Health Care", "Transport", "Communication", "Recreation & Culture", "Education", "Miscellaneous Goods & Services", "All Items")) %>%
+  select(`Data Series`, `2021`, `2022`, `2023`)
+
+# Reshape the data for plotting
+plot_data <- filtered_data %>%
+  pivot_longer(cols = c(`2021`, `2022`, `2023`), names_to = "Year", values_to = "Inflation Rate")
+
+# Create the line plot
+ggplot(plot_data, aes(x = Year, y = `Inflation Rate`, color = `Data Series`, group = `Data Series`)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Inflation Rate by Year for Various Categories",
+       x = "Year",
+       y = "Inflation Rate (%)",
+       color = "Category") +
+  theme_minimal() +
+  theme(legend.position = "bottom", 
+        legend.title = element_text(size = 10),
+        legend.text = element_text(size = 8),
+        plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+        axis.title = element_text(size = 12),
+        axis.text = element_text(size = 10)) +
+  guides(color = guide_legend(ncol = 3, byrow = TRUE))
+
+```
+```{r}
+# Create the bar plot
+ggplot(plot_data, aes(x = Year, y = `Inflation Rate`, fill = `Data Series`)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Inflation Rate by Year for Various Categories",
+       x = "Year",
+       y = "Inflation Rate (%)",
+       fill = "Category") +
+  theme_minimal() +
+  theme(legend.position = "bottom", 
+        legend.title = element_text(size = 10),
+        legend.text = element_text(size = 8),
+        plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+        axis.title = element_text(size = 12),
+        axis.text = element_text(size = 10)) +
+  guides(fill = guide_legend(ncol = 2, byrow = TRUE))
+
+
+```
+
+```{r}
+# Create the faceted plot
+ggplot(plot_data, aes(x = Year, y = `Inflation Rate`)) +
+  geom_col() +
+  facet_wrap(~ `Data Series`, scales = "free_y") +
+  labs(title = "Inflation Rate by Year for Various Categories",
+       x = "Year",
+       y = "Inflation Rate (%)") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+        axis.title = element_text(size = 12),
+        axis.text = element_text(size = 10),
+        strip.text = element_text(size = 10))
+
+
+```
+
+```{r}
+# Create the heatmap
+ggplot(plot_data, aes(x = Year, y = `Data Series`, fill = `Inflation Rate`)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient(low = "blue", high = "red") +
+  labs(title = "Inflation Rate by Year for Various Categories",
+       x = "Year",
+       y = "Category",
+       fill = "Inflation Rate (%)") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+        axis.title = element_text(size = 12),
+        axis.text = element_text(size = 10),
+        legend.title = element_text(size = 10),
+        legend.text = element_text(size = 8))
+
+```
+
+```{r}
+# Create the dot plot
+ggplot(plot_data, aes(x = Year, y = `Inflation Rate`, color = `Data Series`)) +
+  geom_point(size = 3) +
+  labs(title = "Inflation Rate by Year for Various Categories",
+       x = "Year",
+       y = "Inflation Rate (%)",
+       color = "Category") +
+  theme_minimal() +
+  theme(legend.position = "bottom", 
+        legend.title = element_text(size = 10),
+        legend.text = element_text(size = 8),
+        plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+        axis.title = element_text(size = 12),
+        axis.text = element_text(size = 10)) +
+  guides(color = guide_legend(ncol = 2, byrow = TRUE))
+
+
+```
+```{r}
+# Create the faceted bar plot
+ggplot(plot_data, aes(x = Year, y = `Inflation Rate`, fill = Year)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_wrap(~ `Data Series`, scales = "free_y") +
+  labs(title = "Inflation Rate by Year for Various Categories",
+       x = "Year",
+       y = "Inflation Rate (%)") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+        axis.title = element_text(size = 12),
+        axis.text = element_text(size = 10),
+        strip.text = element_text(size = 10),
+        legend.position = "bottom")
+
+
+```
+
+```{r}
+# Create the grouped bar plot
+ggplot(plot_data, aes(x = `Data Series`, y = `Inflation Rate`, fill = Year)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Inflation Rate by Year for Various Categories",
+       x = "Category",
+       y = "Inflation Rate (%)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+        axis.title = element_text(size = 12),
+        axis.text = element_text(size = 10),
+        legend.position = "bottom")
+
+```
+
+```{r}
+#| message: false
+# Create the line plot with facets
+ggplot(plot_data, aes(x = Year, y = `Inflation Rate`, color = Year, group = Year)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~ `Data Series`, scales = "free_y") +
+  labs(title = "Inflation Rate by Year for Various Categories",
+       x = "Year",
+       y = "Inflation Rate (%)") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+        axis.title = element_text(size = 12),
+        axis.text = element_text(size = 10),
+        strip.text = element_text(size = 10),
+        legend.position = "bottom")
+
+```
