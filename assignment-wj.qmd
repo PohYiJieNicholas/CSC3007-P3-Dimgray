@@ -1,0 +1,38 @@
+---
+title: "Assignment-Wj"
+author: "Wujie"
+format: html
+editor: visual
+---
+
+## 
+
+# Import library
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+
+```
+
+## Read csv
+
+```{r}
+monthly_ppi <- read.csv('Monthly-PPI.csv', skip = 9)
+# Filter the data to include only the first 152 rows
+monthly_ppi <- monthly_ppi[1:152,]
+yearly_ppi <- read.csv('Yearly-PPI.csv', skip = 9)
+yearly_ppi <- yearly_ppi[1:152,]
+
+```
+
+```{r}
+yearly_ppi
+```
+
+```{r}
+yearly_rate <- yearly_ppi %>%
+  filter(Data.Series %in% c("Food", "Food Excl Food Serving Services", "Clothing & Footwear", "Housing & Utilities", "Household Durables & Services", "Health Care", "Transport", "Communication", "Recreation & Culture", "Education", "Miscellaneous Goods & Services", "All Items")) %>%
+  select(Data.Series, X2020,X2019,X2021, X2022, X2023)
+```
