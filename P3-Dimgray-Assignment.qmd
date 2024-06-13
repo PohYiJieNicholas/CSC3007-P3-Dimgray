@@ -439,3 +439,45 @@ ggplot(filter_miscellaneous, aes(x = month, y = inflation_rate, group=1)) +
   theme_classic()
 ```
 
+```{r}
+#| label: comparison by year
+#| message: false
+
+# Load the new CSV file
+price_index <- read_csv("Price-Index.csv")
+
+# Filter the data to include only the items of interest and the years 2019 and 2023
+filtered_price_index <- price_index |>
+  filter(`Data Series` %in% c("Food", "Food Excl Food Serving Services", "Clothing & Footwear", "Housing & Utilities","Household Durables & Services","Health Care", "Transport","Communication", "Recreation & Culture", "Education", "Miscellaneous Goods & Services", "All Items")) |>
+  select(`Data Series`, `2019`, `2023`)
+
+# Coerce the '2019' and '2023' columns to numeric to ensure consistent types
+filtered_price_index <- filtered_price_index |>
+  mutate(
+    `2019` = as.numeric(`2019`),
+    `2023` = as.numeric(`2023`)
+  )
+
+# Pivot the data to long format for easier plotting
+long_price_index <- filtered_price_index |>
+  pivot_longer(cols = starts_with("20"), names_to = "year", values_to = "inflation_rate")
+
+# Plot the data
+ggplot(long_price_index, aes(x = `Data Series`, y = inflation_rate, fill = year)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = sprintf("%.1f", inflation_rate)), 
+            position = position_dodge(width = 0.9),  
+            vjust = -0.5,
+            size = 3) + 
+  labs(
+    title = "Comparison of Inflation Rates by Category between 2019 and 2023",
+    x = "Category",
+    y = "Inflation Rate (%)",
+    fill = "Year",
+    caption = "Source: Department of Statistics Singapore"
+  ) +
+  theme_classic() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+```
