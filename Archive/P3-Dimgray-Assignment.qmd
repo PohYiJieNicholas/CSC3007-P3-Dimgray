@@ -35,6 +35,7 @@ inflation_rate <- inflation_rate[1:152,]
 
 inflation_rate 
 ```
+
 ```{r}
 #| label: inflation-rate-yearly
 #| message: false
@@ -438,16 +439,15 @@ ggplot(filter_miscellaneous, aes(x = month, y = inflation_rate, group=1)) +
     caption = "Source: Department of Statistics Singapore") +
   theme_classic()
 ```
-
+```{r}
+inflation_rate_yearly
+```
 ```{r}
 #| label: comparison by year
 #| message: false
 
-# Load the new CSV file
-price_index <- read_csv("Price-Index.csv")
-
 # Filter the data to include only the items of interest and the years 2019 and 2023
-filtered_price_index <- price_index |>
+filtered_price_index <- inflation_rate_yearly |>
   filter(`Data Series` %in% c("Food", "Food Excl Food Serving Services", "Clothing & Footwear", "Housing & Utilities","Household Durables & Services","Health Care", "Transport","Communication", "Recreation & Culture", "Education", "Miscellaneous Goods & Services", "All Items")) |>
   select(`Data Series`, `2019`, `2023`)
 

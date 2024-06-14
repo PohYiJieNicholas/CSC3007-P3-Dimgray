@@ -177,7 +177,7 @@ ggplot(filter_food, aes(x = month, y = inflation_rate, group=1)) +
 ```
 
 ```{r}
-#| label: filter-Food
+#| label: filter-Food2
 #| fig-height: 4
 #| message: false
 

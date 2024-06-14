@@ -696,6 +696,74 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>inflation_rate_yearly</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 152 × 63
+   `Data Series`  `2023` `2022` `2021` `2020` `2019` `2018` `2017` `2016` `2015`
+   &lt;chr&gt;           &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt; 
+ 1 All Items         4.8    6.1    2.3   -0.2 0.6    0.4    0.6    -0.5   -0.5  
+ 2 Food              5.8    5.3    1.4    1.9 1.5    1.4    1.4    2.1    1.9   
+ 3 Food Excl Foo…    5.1    5.3    1.6    2.9 1.1    1.3    1.3    2.3    1.2   
+ 4 Bread &amp; Cerea…    6.8    4      0.6    1.9 1.5    1.4    0.6    1.3    1.3   
+ 5 Rice              3     -1.4   -1.9    1.8 3.9    1.4    -0.5   0.8    -0.9  
+ 6 Flour            10.8    2.1   -2     -2.1 -0.2   -1.9   0.3    1.1    -0.9  
+ 7 Bread             8.2    5.1    1.1    1   1.1    1.6    0.6    1.8    2     
+ 8 Noodles &amp; Pas…    6.5    6.7    1.2    2   -0.7   0.5    0.1    1      -1.2  
+ 9 Biscuits &amp; Co…    6.8    7.4    0.4    4.2 1.3    1.6    1.1    2.1    1.5   
+10 Cakes &amp; Pastr…    6.7    4.1    1.5    2.3 1.5    2      1.5    0.7    3     
+# ℹ 142 more rows
+# ℹ 53 more variables: `2014` &lt;chr&gt;, `2013` &lt;chr&gt;, `2012` &lt;chr&gt;, `2011` &lt;chr&gt;,
+#   `2010` &lt;chr&gt;, `2009` &lt;chr&gt;, `2008` &lt;chr&gt;, `2007` &lt;chr&gt;, `2006` &lt;chr&gt;,
+#   `2005` &lt;chr&gt;, `2004` &lt;chr&gt;, `2003` &lt;chr&gt;, `2002` &lt;chr&gt;, `2001` &lt;chr&gt;,
+#   `2000` &lt;chr&gt;, `1999` &lt;chr&gt;, `1998` &lt;chr&gt;, `1997` &lt;chr&gt;, `1996` &lt;chr&gt;,
+#   `1995` &lt;chr&gt;, `1994` &lt;chr&gt;, `1993` &lt;chr&gt;, `1992` &lt;chr&gt;, `1991` &lt;chr&gt;,
+#   `1990` &lt;chr&gt;, `1989` &lt;chr&gt;, `1988` &lt;chr&gt;, `1987` &lt;chr&gt;, `1986` &lt;chr&gt;, …</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter the data to include only the items of interest and the years 2019 and 2023</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>filtered_price_index <span class="ot">&lt;-</span> inflation_rate_yearly <span class="sc">|&gt;</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="st">`</span><span class="at">Data Series</span><span class="st">`</span> <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Food"</span>, <span class="st">"Food Excl Food Serving Services"</span>, <span class="st">"Clothing &amp; Footwear"</span>, <span class="st">"Housing &amp; Utilities"</span>,<span class="st">"Household Durables &amp; Services"</span>,<span class="st">"Health Care"</span>, <span class="st">"Transport"</span>,<span class="st">"Communication"</span>, <span class="st">"Recreation &amp; Culture"</span>, <span class="st">"Education"</span>, <span class="st">"Miscellaneous Goods &amp; Services"</span>, <span class="st">"All Items"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="st">`</span><span class="at">Data Series</span><span class="st">`</span>, <span class="st">`</span><span class="at">2019</span><span class="st">`</span>, <span class="st">`</span><span class="at">2023</span><span class="st">`</span>)</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Coerce the '2019' and '2023' columns to numeric to ensure consistent types</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>filtered_price_index <span class="ot">&lt;-</span> filtered_price_index <span class="sc">|&gt;</span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">2019</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">as.numeric</span>(<span class="st">`</span><span class="at">2019</span><span class="st">`</span>),</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">2023</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">as.numeric</span>(<span class="st">`</span><span class="at">2023</span><span class="st">`</span>)</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Pivot the data to long format for easier plotting</span></span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>long_price_index <span class="ot">&lt;-</span> filtered_price_index <span class="sc">|&gt;</span></span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">starts_with</span>(<span class="st">"20"</span>), <span class="at">names_to =</span> <span class="st">"year"</span>, <span class="at">values_to =</span> <span class="st">"inflation_rate"</span>)</span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the data</span></span>
+<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(long_price_index, <span class="fu">aes</span>(<span class="at">x =</span> <span class="st">`</span><span class="at">Data Series</span><span class="st">`</span>, <span class="at">y =</span> inflation_rate, <span class="at">fill =</span> year)) <span class="sc">+</span></span>
+<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">position =</span> <span class="st">"dodge"</span>) <span class="sc">+</span></span>
+<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">sprintf</span>(<span class="st">"%.1f"</span>, inflation_rate)), </span>
+<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a>            <span class="at">position =</span> <span class="fu">position_dodge</span>(<span class="at">width =</span> <span class="fl">0.9</span>),  </span>
+<span id="cb28-22"><a href="#cb28-22" aria-hidden="true" tabindex="-1"></a>            <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.5</span>,</span>
+<span id="cb28-23"><a href="#cb28-23" aria-hidden="true" tabindex="-1"></a>            <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span> </span>
+<span id="cb28-24"><a href="#cb28-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb28-25"><a href="#cb28-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Comparison of Inflation Rates by Category between 2019 and 2023"</span>,</span>
+<span id="cb28-26"><a href="#cb28-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Category"</span>,</span>
+<span id="cb28-27"><a href="#cb28-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Inflation Rate (%)"</span>,</span>
+<span id="cb28-28"><a href="#cb28-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"Year"</span>,</span>
+<span id="cb28-29"><a href="#cb28-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"Source: Department of Statistics Singapore"</span></span>
+<span id="cb28-30"><a href="#cb28-30" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb28-31"><a href="#cb28-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb28-32"><a href="#cb28-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb28-33"><a href="#cb28-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>)</span>
+<span id="cb28-34"><a href="#cb28-34" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="P3-Dimgray-Assignment_files/figure-html/comparison%20by%20year-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
 
 </main>
