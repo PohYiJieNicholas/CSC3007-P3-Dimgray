@@ -10,9 +10,12 @@ editor: visual
 # Import library
 
 ```{r}
-library(tidyverse)
-library(ggplot2)
 library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(plotly)
+library(tidyverse)
+
 
 ```
 
@@ -178,4 +181,172 @@ ggplot(long_month_data, aes(x = Date, y = Rate_Change, color = `Data Series`, gr
         axis.text = element_text(size = 10),
         axis.title = element_text(size = 12),
         legend.position = "bottom")
+```
+
+```{r}
+# Reshape the data from wide to long format
+long_month_data <- month_data %>%
+  pivot_longer(cols = matches("^2019|^2020|^2021|^2022|^2023"), 
+               names_to = "Year_Month", values_to = "Rate_Change") %>%
+  separate(Year_Month, into = c("Year", "Month"), sep = " ") %>%
+  mutate(Year = as.integer(Year), 
+         Month = factor(Month, levels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")),
+         Date = as.Date(paste(Year, Month, "01", sep = "-"), format = "%Y-%b-%d"))
+
+# Create the line graph using ggplot2
+p <- ggplot(long_month_data, aes(x = Date, y = Rate_Change, color = `Data Series`, group = `Data Series`)) +
+  geom_line(size = 1) +
+  labs(title = "Monthly CPI Rate Change from January 2019 to December 2023",
+       x = "Date",
+       y = "Rate Change (%)",
+       color = "Data Series") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 45, hjust = 1), # Rotate x-axis labels for better readability
+        axis.text = element_text(size = 10),
+        axis.title = element_text(size = 12),
+        legend.position = "bottom")
+
+# Convert the ggplot2 graph to an interactive plotly graph
+interactive_plot <- ggplotly(p)
+
+# Display the interactive plot
+interactive_plot
+
+```
+
+```{r}
+# Define custom color palette
+custom_colors <- c("All Items" = "red", "Education" = "green", "Health Care" = "blue", 
+                   "Clothing & Footwear" = "orange", "Food" = "purple", "Household Durables & Services" = "brown",
+                   "Communication" = "pink", "Food Excl Food Serving Services" = "cyan", 
+                   "Housing & Utilities" = "magenta", "Recreation & Culture" = "yellow", 
+                   "Transport" = "black", "Miscellaneous" = "gray")
+
+# Create the line graph using ggplot2
+p <- ggplot(long_month_data, aes(x = Date, y = Rate_Change, color = `Data Series`, group = `Data Series`)) +
+  geom_line(size = 1) +
+  scale_color_manual(values = custom_colors) +
+  labs(title = "Monthly CPI Rate Change from January 2019 to December 2023",
+       x = "Time Period",
+       y = "Rate Change (%)",
+       color = NULL) + # Use "Category" as the legend title
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Arial"),
+        axis.text.x = element_text(angle = 45, hjust = 1, size = 10, family = "Arial"), # Rotate x-axis labels for better readability
+        axis.text.y = element_text(size = 10, family = "Arial"),
+        axis.title = element_text(size = 12, family = "Arial"),
+        legend.position = "bottom",
+        legend.title = element_text(size = 12, family = "Arial"), # Adjust legend title size
+        legend.text = element_text(size = 10, family = "Arial"),
+        plot.margin = margin(20, 20, 50, 20)) + # Increase bottom margin for legend
+  guides(color = guide_legend(nrow = 4, byrow = TRUE))
+
+# Display the static plot
+print(p)
+```
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+library(lubridate)
+library(RColorBrewer)
+
+set.seed(123)
+categories <- c("All Items", "Education", "Health Care", "Clothing & Footwear", "Food", 
+                "Household Durables & Services", "Communication", "Food Excl Food Serving Services", 
+                "Housing & Utilities", "Recreation & Culture", "Transport", "Miscellaneous")
+long_month_data$Category <- sample(categories, nrow(long_month_data), replace = TRUE)
+
+# Create the heatmap using ggplot2 with spacing between tiles and facets for each category
+p <- ggplot(long_month_data, aes(x = Year, y = Month, fill = Rate_Change)) +
+  geom_tile(color = "white", width = 0.9, height = 0.9) + # Adjust width and height for spacing
+  scale_fill_gradientn(colors = brewer.pal(11, "Spectral"), name = "Rate Change (%)") +
+  labs(title = "Monthly CPI Rate Change from January 2019 to December 2023",
+       x = "Year",
+       y = "Month") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Arial"),
+        axis.text.x = element_text(size = 10, family = "Arial"),
+        axis.text.y = element_text(size = 10, family = "Arial"),
+        axis.title = element_text(size = 12, family = "Arial"),
+        legend.position = "bottom",
+        legend.title = element_text(size = 12, family = "Arial"),
+        legend.text = element_text(size = 10, family = "Arial"),
+        panel.grid = element_blank(), # Remove grid lines
+        panel.background = element_blank(), # Remove panel background
+        plot.margin = margin(0, 0, 0, 0)) + # Remove plot margins
+  facet_wrap(~ Category) # Facet by Category
+
+# Display the heatmap
+print(p)
+
+```
+
+```{r}
+# Filter data to include only "All Items"
+all_items_data <- long_month_data %>% filter(Category == "All Items")
+
+# Remove rows with missing values
+all_items_data <- na.omit(all_items_data)
+
+# Create the heatmap using ggplot2 with spacing between tiles
+p <- ggplot(all_items_data, aes(x = Year, y = Month, fill = Rate_Change)) +
+  geom_tile(color = "white", width = 0.9, height = 0.9) + # Adjust width and height for spacing
+  scale_fill_gradientn(colors = brewer.pal(11, "Spectral"), name = "Rate Change (%)") +
+  labs(title = "Monthly CPI Rate Change for All Items from January 2019 to December 2023",
+       x = "Year",
+       y = "Month") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Arial"),
+        axis.text.x = element_text(size = 10, family = "Arial"),
+        axis.text.y = element_text(size = 10, family = "Arial"),
+        axis.title = element_text(size = 12, family = "Arial"),
+        legend.position = "bottom",
+        legend.title = element_text(size = 12, family = "Arial"),
+        legend.text = element_text(size = 10, family = "Arial"),
+        panel.grid = element_blank(), # Remove grid lines
+        panel.background = element_blank(), # Remove panel background
+        plot.margin = margin(0, 0, 0, 0)) # Remove plot margins
+
+# Display the heatmap
+print(p)
+```
+
+```{r}
+
+filtered_data <- long_month_data %>% 
+  filter(Category == "All Items" & (Year == 2019 | Year == 2023))
+# Fill missing values using linear interpolation
+filtered_data <- filtered_data %>%
+  group_by(Month) %>%
+  mutate(Rate_Change = zoo::na.approx(Rate_Change, na.rm = FALSE)) %>%
+  ungroup()
+
+# Create the heatmap using ggplot2 with spacing between tiles
+p <- ggplot(filtered_data, aes(x = as.factor(Year), y = Month, fill = Rate_Change)) +
+  geom_tile(color = "white", width = 0.9, height = 0.9) + # Adjust width and height for spacing
+  scale_fill_gradientn(colors = brewer.pal(11, "Spectral"), name = "Rate Change (%)") +
+  labs(title = "Monthly CPI Rate Change for All Items: 2019 vs 2023",
+       x = "Year",
+       y = "Month") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Arial"),
+        axis.text.x = element_text(size = 10, family = "Arial"),
+        axis.text.y = element_text(size = 10, family = "Arial"),
+        axis.title = element_text(size = 12, family = "Arial"),
+        legend.position = "bottom",
+        legend.title = element_text(size = 12, family = "Arial"),
+        legend.text = element_text(size = 10, family = "Arial"),
+        panel.grid = element_blank(), # Remove grid lines
+        panel.background = element_blank(), # Remove panel background
+        plot.margin = margin(0, 0, 0, 0)) # Remove plot margins
+
+# Display the heatmap
+print(p)
+```
+
+```{r}
+print(filtered_data)
+
 ```
