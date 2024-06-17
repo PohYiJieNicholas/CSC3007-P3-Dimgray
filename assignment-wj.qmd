@@ -212,7 +212,13 @@ interactive_plot <- ggplotly(p)
 
 # Display the interactive plot
 interactive_plot
+```
 
+```{r}
+print(long_month_data)
+```
+
+```{}
 ```
 
 ```{r}
@@ -347,6 +353,5 @@ print(p)
 ```
 
 ```{r}
-print(filtered_data)
 
 ```

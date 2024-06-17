@@ -1,0 +1,177 @@
+---
+title: "project_plot"
+author: "wujie"
+format: html
+---
+
+```{r}
+# Load necessary libraries
+library(tidyverse)
+library(lubridate)
+library(ggplot2)
+```
+
+
+# load dataset
+```{r}
+# Load the dataset
+dataset <- read_csv("M212911.csv", skip = 10)
+dataset <- dataset[1:152,]
+```
+
+# Preprocess data
+```{r}
+# Convert relevant columns to numeric
+dataset <- dataset %>%
+  mutate(across(matches("^2019|^2020|^2021|^2022|^2023"), ~ as.numeric(as.character(.))))
+
+month_data <- dataset %>%
+  filter(`Data Series` %in% c("Food", "Food Excl Food Serving Services", "Clothing & Footwear", "Housing & Utilities", "Household Durables & Services", "Health Care", "Transport", "Communication", "Recreation & Culture", "Education", "Miscellaneous Goods & Services", "All Items")) %>%
+  select(`Data Series`, matches("^2019|^2020|^2021|^2022|^2023"))
+
+```
+
+#plot
+
+```{r}
+# Pivot longer for heatmap generation
+long_data <- month_data %>%
+  pivot_longer(cols = matches("^2019|^2020|^2021|^2022|^2023"), 
+               names_to = "Year_Month", values_to = "Percent_Change") %>%
+  separate(Year_Month, into = c("Year", "Month"), sep = " ") %>%
+  mutate(Year = as.integer(Year), 
+         Month = factor(Month, levels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")),
+         Date = as.Date(paste(Year, Month, "01", sep = "-"), format = "%Y-%b-%d"))
+
+```
+
+# Generate heatmap
+```{r}
+
+
+long_data <- long_data %>%
+  mutate(`Data Series` = case_when(
+    `Data Series` == "Miscellaneous Goods & Services" ~ "Miscellaneous\nGoods & Services",
+    `Data Series` == "Household Durables & Services" ~ "Household Durables\n& Services",
+    `Data Series` == "Food Excl Food Serving Services" ~ "Food Excl Food\nServing Services",
+    TRUE ~ as.character(`Data Series`)
+  ))
+
+
+# Define custom color scale
+color_scale <- scale_fill_gradientn(
+   colors = c("#003f5c","#2f4b7c","#03b0f0", "#89d9fa", "#fee400", "#f7801c", "#bb1211", "#7a0c0a", "#440606"),
+  #colors = c("#03b0f0", "#89d9fa", "#fee400", "#f7801c", "#bb1211"),
+  values = scales::rescale(c(min(long_data$Percent_Change, na.rm = TRUE), -3, 0, 3, 6, 9, 12, max(long_data$Percent_Change, na.rm = TRUE))),  # Define breakpoints dynamically
+  limits = c(min(long_data$Percent_Change, na.rm = TRUE), max(long_data$Percent_Change, na.rm = TRUE)),  # Dynamic limits
+  breaks = seq(floor(min(long_data$Percent_Change, na.rm = TRUE)), ceiling(max(long_data$Percent_Change, na.rm = TRUE)), by = 3),  # Adjust breaks dynamically
+  labels = as.character(seq(floor(min(long_data$Percent_Change, na.rm = TRUE)), ceiling(max(long_data$Percent_Change, na.rm = TRUE)), by = 3))  # Adjust labels dynamically
+
+)
+
+# Generate heatmap with customized color and spacing
+ggplot(long_data, aes(x = Date, y = `Data Series`, fill = Percent_Change)) +
+  geom_tile(color = "white", size = 0.2) +  # Add spacing between tiles
+  geom_vline(xintercept = as.numeric(as.Date("2020-04-01")), color = "black", linetype = "solid", size = 0.8) +  # circuit breaker lockdown 
+  geom_vline(xintercept = as.numeric(as.Date("2023-02-13")), color = "black", linetype = "solid", size = 0.8) +  # fully release
+  color_scale +
+  scale_x_date(
+    breaks = seq.Date(from = min(long_data$Date, na.rm = TRUE), to = max(long_data$Date, na.rm = TRUE), by = "6 months"),
+    date_labels = "%b %Y"
+  )+
+  # more space between y-axis elements
+  labs(title = "Percent Change In Consumer Price Index (CPI) Over Corresponding Period Of Previous Year, Monthly",
+       x = NULL, y = NULL, fill = "Percent Change") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme(plot.title = element_text(size = 15), 
+        axis.text.x = element_text(size = 10), 
+        axis.text.y = element_text(size = 10, margin = margin(0, 0, 0, 20)),  # Add margin to y-axis text
+        legend.title = element_text(size = 10),
+        legend.text = element_text(size = 10)) +
+  theme(plot.margin = unit(c(0, 0, 0, 0), "cm")) +
+  theme(legend.position = "bottom") +
+  theme(legend.key.size = unit(1, "cm")) +
+  theme(legend.key.width = unit(1, "cm"))
+```
+```{r}
+
+# Filter for 2023 data
+data_2023 <- month_data %>%
+  select(`Data Series`, matches("^2023"))
+
+# Calculate average change for 2023
+data_2023 <- data_2023 %>%
+  rowwise() %>%
+  mutate(`2023 Average Change` = mean(c_across(matches("^2023")), na.rm = TRUE)) %>%
+  ungroup()
+
+# Pivot longer for heatmap generation
+long_data <- data_2023 %>%
+  pivot_longer(cols = matches("^2023"), 
+               names_to = "Year_Month", values_to = "Percent_Change") %>%
+  separate(Year_Month, into = c("Year", "Month"), sep = " ", extra = "drop") %>%
+  mutate(Year = as.integer(Year), 
+         Month = factor(Month, levels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")))
+
+# Define the custom discrete color scale
+discrete_colors <- c("#03b0f0", "#89d9fa", "#fee400", "#f7801c", "#bb1211")
+breaks <- c(-3, 0, 3, 6, 9, 12)
+labels <- c("-3 to 0", "0 to 3", "3 to 6", "6 to 9", "9 to 12")
+
+
+```
+
+
+```{r}
+# Prepare data for the average change row
+average_data <- data_2023 %>%
+  select(`Data Series`, `2023 Average Change`) %>%
+  rename(Percent_Change = `2023 Average Change`) %>%
+  mutate(Month = "Average", Year = 2023)
+
+
+# Combine the average data with the original long data
+combined_data <- bind_rows(long_data, average_data)
+
+# Ensure "Average" appears last in the plot
+combined_data$Month <- factor(combined_data$Month, levels = c(levels(long_data$Month), "Average"))
+
+
+# Filter out any NA values
+combined_data <- combined_data %>% filter(!is.na(Month))
+
+```
+
+```{r}
+print(combined_data)
+```
+
+
+
+```{r}
+
+# Generate the heatmap including the average row
+heatmap_with_average <- ggplot(combined_data, aes(x = Month, y = `Data Series`)) +
+  geom_tile(aes(fill = cut(Percent_Change, breaks = breaks, labels = labels, include.lowest = TRUE)), color = "white", size = 1) +  # Use white fill and black border for each tile
+  scale_fill_manual(values = setNames(discrete_colors, labels), name = "Percent Change") +
+  geom_text(aes(label = round(Percent_Change, 1)), size = 3, color = "black") +  # Add text labels for percent change
+  labs(title = "Percent Change In Consumer Price Index (CPI) Over Corresponding Period Of Previous Year, 2023",
+       x = "", y = "") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),  # Rotate x-axis labels
+        axis.text.y = element_text(size = 8),  # Adjust y-axis label size
+        plot.title = element_text(size = 20), 
+        legend.title = element_blank(),  # Remove legend title
+        legend.text = element_text(size = 10),
+        legend.position = "top",
+        legend.direction = "horizontal",
+        legend.key.height = unit(0.5, "cm"),
+        legend.key.width = unit(2, "cm"),
+        legend.spacing.x = unit(0, "cm"),
+        legend.spacing.y = unit(0.5, "cm"),
+        plot.margin = unit(c(1, 1, 1, 1), "cm"))
+
+# Display the heatmap with the average row
+print(heatmap_with_average)
+```
