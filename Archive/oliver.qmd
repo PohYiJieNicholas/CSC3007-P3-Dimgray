@@ -1,0 +1,265 @@
+---
+title: "P3-Dimgray-Assignment"
+author: "Jared Teo, Nicholas Poh, Oliver Choy, WuJie, Nicole, Kurt"
+format: html
+---
+
+# Required Packages
+
+```{r}
+#| label: required-packages
+#| message: false
+
+library(tidyverse)
+library(gt)
+library(palmerpenguins)
+library(ggbeeswarm)
+library(ggmosaic)
+library(ggplot2)
+library(dplyr)
+library(readr)
+library(reshape2)
+library(gridExtra)
+
+```
+
+```{r}
+#| label: inflation-rate
+#| message: false
+
+inflation_rate <- read_csv("M212911.csv", skip = 10)
+inflation_rate <- inflation_rate[1:152,]
+inflation_rate 
+
+```
+
+```{r}
+#| label: inflation-rate-yearly
+#| message: false
+
+inflation_rate_yearly <- read_csv("M212941.csv", skip = 9)
+inflation_rate_yearly <- inflation_rate_yearly[1:152,]
+inflation_rate_yearly
+
+```
+
+```{r}
+# Filter the data
+filtered_yearly_data <- inflation_rate_yearly |>
+  filter(`Data Series` %in% 
+  c("Food", "Food Excl Food Serving Services", "Clothing & Footwear","Housing & Utilities","Household Durables & Services","Health Care","Transport","Communication", "Recreation & Culture", "Education", "Miscellaneous Goods & Services", "All Items")) |>
+  select(`Data Series`, `2023`, `2022`,`2021`, `2020`,`2019`)|>
+  drop_na(`Data Series`, `2023`, `2022`,`2021`, `2020`,`2019`)
+
+filtered_yearly_data
+
+```
+
+```{r}
+#| label: filtered-yearly
+#| message: false
+
+data_long <- filtered_yearly_data |>
+  melt(id.vars = "Data Series", variable.name = "Year", value.name = "Value")|>
+  drop_na(`Data Series`, `Year`, `Value`)
+
+# Convert the Year column to numeric
+data_long$Year <- as.numeric(as.character(data_long$Year))
+
+# Convert the Value column to numeric, handling non-numeric entries (e.g., "na")
+data_long$Value <- as.numeric(as.character(data_long$Value))
+
+data_long
+
+```
+
+```{r}
+#| label: inflation-yearly-lineplot
+#| fig-height: 6
+#| fig-width: 10
+
+# Generate the line plot
+ggplot(data_long, aes(x = Year, y = Value, color = `Data Series`)) +
+  geom_line() +
+  geom_point() +
+  theme_minimal() +
+  labs(title = "Line Plot of Inflation Rate by Data Series and Year",
+       x = "Year",
+       y = "Inflation Rate (%)")
+
+```
+
+```{r}
+#| label: inflation-monthly-filter
+#| fig-height: 6
+#| fig-width: 10
+#| message: false
+
+# Filter the data
+filtered_data <- inflation_rate |>
+  filter(`Data Series` %in% 
+  c("Food", "Food Excl Food Serving Services", "Clothing & Footwear","Housing & Utilities","Household Durables & Services","Health Care","Transport","Communication", "Recreation & Culture", "Education", "Miscellaneous Goods & Services", "All Items")) |>
+  select(`Data Series`, `2023 Jan`, `2023 Feb`,`2023 Mar`, `2023 Apr`,`2023 May`, `2023 Jun`, `2023 Jul`, `2023 Aug`,`2023 Sep`, `2023 Oct`,`2023 Nov`, `2023 Dec`)
+
+filtered_month_data <- filtered_data |>
+  pivot_longer(cols = -`Data Series`, names_to = "month", values_to = "inflation_rate")
+
+# Convert month to proper date format
+filtered_month_data <- filtered_month_data |>
+  mutate(month = as.POSIXct(strptime(paste(month, "01"), "%Y %b %d")))
+
+```
+
+```{r}
+#| label: inflation-rate-barchart
+#| fig-height: 6
+#| fig-width: 10
+#| message: false
+
+# Generate the bar chart
+ggplot(filtered_month_data, aes(x = month, y = inflation_rate, fill = `Data Series`)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  theme_minimal() +
+  labs(title = "Bar Chart of Inflation Rate by Data Series and Month",
+       x = "Month",
+       y = "Inflation Rate (%)")
+
+```
+
+```{r}
+#| label: filter-all-items
+#| fig-height: 4
+#| message: false
+
+filter_all_items <- filtered_data %>%
+  filter(`Data Series` == "All Items") %>%
+  pivot_longer(cols = -`Data Series`, names_to = "month", values_to = "inflation_rate")
+
+# Convert month to proper date format
+filter_all_items <- filter_all_items %>%
+  mutate(month = as.POSIXct(strptime(paste(month, "01"), "%Y %b %d")))
+
+ggplot(filter_all_items, aes(x = month, y = inflation_rate, group=1)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Line Graph of 'All Items' Inflation Percentage Change Through 2023",
+    x = "Month", 
+    y = "Inflation Rate (%)",
+    caption = "Source: Department of Statistics Singapore") +
+  theme_classic()
+
+```
+
+```{r}
+#| label: filter-Food
+#| fig-height: 4
+#| message: false
+
+filter_food <- filtered_data %>%
+  filter(`Data Series` == "Food") %>%
+  pivot_longer(cols = -`Data Series`, names_to = "month", values_to = "inflation_rate")
+
+# Convert month to proper date format
+filter_food <- filter_food %>%
+  mutate(month = as.POSIXct(strptime(paste(month, "01"), "%Y %b %d")))
+
+ggplot(filter_food, aes(x = month, y = inflation_rate, group=1)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Line Graph of 'Food' Inflation Percentage Change Through 2023",
+    x = "Month", 
+    y = "Inflation Rate (%)",
+    caption = "Source: Department of Statistics Singapore") +
+  theme_classic()
+
+```
+
+```{r}
+#| label: filter-Food2
+#| fig-height: 4
+#| message: false
+
+filter_food <- filtered_data %>%
+  filter(`Data Series` == "Food") %>%
+  pivot_longer(cols = -`Data Series`, names_to = "month", values_to = "inflation_rate")
+
+# Convert month to proper date format
+filter_food <- filter_food %>%
+  mutate(month = as.POSIXct(strptime(paste(month, "01"), "%Y %b %d")))
+
+ggplot(filter_food, aes(x = month, y = inflation_rate, group=1)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Line Graph of 'Food' Inflation Percentage Change Through 2023",
+    x = "Month", 
+    y = "Inflation Rate (%)",
+    caption = "Source: Department of Statistics Singapore") +
+  theme_classic()
+
+```
+
+```{r}
+#| label: filter-house
+#| fig-height: 4
+#| message: false
+
+filter_house <- filtered_data %>%
+  filter(`Data Series` == "Housing & Utilities") %>%
+  pivot_longer(cols = -`Data Series`, names_to = "month", values_to = "inflation_rate")
+
+# Convert month to proper date format
+filter_house <- filter_house %>%
+  mutate(month = as.POSIXct(strptime(paste(month, "01"), "%Y %b %d")))
+
+ggplot(filter_house, aes(x = month, y = inflation_rate, group=1)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Line Graph of 'Housing & Utilities' Inflation Percentage Change Through 2023",
+    x = "Month", 
+    y = "Inflation Rate (%)",
+    caption = "Source: Department of Statistics Singapore") +
+  theme_classic()
+
+```
+
+```{r}
+#| label: inflation-violinplot
+#| fig-height: 6
+#| fig-width: 10
+
+# Generate the violin plot: Combine a density plot with a box plot, displaying the probability density of the data at different values
+# trim = TRUE: Trim the tails of the violins
+# scale = "width": Scale the width of the violins, makes it easier for comparison
+# adjust = 1.5: Adjust the width of the violins; increasing it = makes plot smoother, 
+# decreasing it = makes plot more sensitive to plot variation
+
+ggplot(data_long, aes(x = `Data Series`, y = Value)) +
+  geom_violin(trim = TRUE, scale = "width", adjust = 1.5) +
+  theme_minimal() +
+  labs(title = "Violin Plot of Inflation Rate by Data Series",
+       x = "Data Series",
+       y = "Inflation Rate (%)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+```{r}
+#| label: inflation-facetgrid
+#| fig-height: 10
+#| fig-width: 10
+
+# Generate the facet grid plot
+ggplot(data_long, aes(x = Year, y = Value)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~ `Data Series`, scales = "free_y") +
+  theme_minimal() +
+  labs(title = "Facet Grid of Inflation Rate by Data Series",
+       x = "Year",
+       y = "Inflation Rate (%)")
+
+```

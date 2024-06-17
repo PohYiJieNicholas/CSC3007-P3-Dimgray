@@ -18,6 +18,9 @@ library(ggmosaic)
 library(ggplot2)
 library(dplyr)
 library(readr)
+library(reshape2)
+library(gridExtra)
+
 
 ```
 
@@ -34,7 +37,65 @@ inflation_rate
 ```
 
 ```{r}
-#| label: inflation-rate-plot
+#| label: inflation-rate-yearly
+#| message: false
+
+inflation_rate_yearly <- read_csv("M212941.csv", skip = 9)
+
+inflation_rate_yearly <- inflation_rate_yearly[1:152,]
+
+inflation_rate_yearly
+```
+
+```{r}
+# Filter the data
+filtered_yearly_data <- inflation_rate_yearly |>
+  filter(`Data Series` %in% 
+  c("Food", "Food Excl Food Serving Services", "Clothing & Footwear","Housing & Utilities","Household Durables & Services","Health Care","Transport","Communication", "Recreation & Culture", "Education", "Miscellaneous Goods & Services", "All Items")) |>
+  select(`Data Series`, `2023`, `2022`,`2021`, `2020`,`2019`)|>
+  drop_na(`Data Series`, `2023`, `2022`,`2021`, `2020`,`2019`)
+
+filtered_yearly_data
+
+```
+
+```{r}
+#| label: filtered-yearly
+#| message: false
+
+
+data_long <- filtered_yearly_data |>
+  melt(id.vars = "Data Series", variable.name = "Year", value.name = "Value")|>
+  drop_na(`Data Series`, `Year`, `Value`)
+  
+
+# Convert the Year column to numeric
+data_long$Year <- as.numeric(as.character(data_long$Year))
+
+# Convert the Value column to numeric, handling non-numeric entries (e.g., "na")
+data_long$Value <- as.numeric(as.character(data_long$Value))
+
+data_long
+```
+
+```{r}
+#| label: inflation-yearly-heatmap
+#| fig-height: 6
+#| fig-width: 10
+
+# Generate the heatmap
+ggplot(data_long, aes(x = Year, y = `Data Series`, fill = Value)) +
+  geom_tile() +
+  scale_fill_gradient(low = "#fee8c8", high = "#e34a33", na.value = "grey") +
+  theme_minimal() +
+  labs(title = "Heatmap of inflation rate by data series and year",
+       x = "Year",
+       y = "Data Series")
+```
+
+
+```{r}
+#| label: inflation-monthly-filter
 #| fig-height: 6
 #| fig-width: 10
 #| message: false
@@ -50,7 +111,29 @@ filtered_month_data <- filtered_data |>
 # Convert month to proper date format
 filtered_month_data <- filtered_month_data |>
   mutate(month = as.POSIXct(strptime(paste(month, "01"), "%Y %b %d")))
+```
 
+```{r}
+#| label: inflation-rate-heatmap
+#| message: false
+
+# Generate the heatmap
+ggplot(filtered_month_data, aes(x = month, y = `Data Series`, fill = inflation_rate)) +
+  geom_tile() +
+  scale_fill_gradient(low = "#fee8c8", high = "#e34a33") +
+  theme_minimal() +
+  labs(title = "Heatmap of inflation rate by data series and month",
+       x = "Month",
+       y = "Data Series")
+
+
+```
+
+```{r}
+#| label: inflation-rate-plot
+#| fig-height: 6
+#| fig-width: 10
+#| message: false
 ggplot(filtered_month_data, aes(month, inflation_rate, group = `Data Series`)) +
   geom_point(aes(color = month, size = inflation_rate)) +
   geom_path(aes(color = month))+
@@ -356,4 +439,45 @@ ggplot(filter_miscellaneous, aes(x = month, y = inflation_rate, group=1)) +
     caption = "Source: Department of Statistics Singapore") +
   theme_classic()
 ```
+```{r}
+inflation_rate_yearly
+```
+```{r}
+#| label: comparison by year
+#| message: false
 
+# Filter the data to include only the items of interest and the years 2019 and 2023
+filtered_price_index <- inflation_rate_yearly |>
+  filter(`Data Series` %in% c("Food", "Food Excl Food Serving Services", "Clothing & Footwear", "Housing & Utilities","Household Durables & Services","Health Care", "Transport","Communication", "Recreation & Culture", "Education", "Miscellaneous Goods & Services", "All Items")) |>
+  select(`Data Series`, `2019`, `2023`)
+
+# Coerce the '2019' and '2023' columns to numeric to ensure consistent types
+filtered_price_index <- filtered_price_index |>
+  mutate(
+    `2019` = as.numeric(`2019`),
+    `2023` = as.numeric(`2023`)
+  )
+
+# Pivot the data to long format for easier plotting
+long_price_index <- filtered_price_index |>
+  pivot_longer(cols = starts_with("20"), names_to = "year", values_to = "inflation_rate")
+
+# Plot the data
+ggplot(long_price_index, aes(x = `Data Series`, y = inflation_rate, fill = year)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = sprintf("%.1f", inflation_rate)), 
+            position = position_dodge(width = 0.9),  
+            vjust = -0.5,
+            size = 3) + 
+  labs(
+    title = "Comparison of Inflation Rates by Category between 2019 and 2023",
+    x = "Category",
+    y = "Inflation Rate (%)",
+    fill = "Year",
+    caption = "Source: Department of Statistics Singapore"
+  ) +
+  theme_classic() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+```
