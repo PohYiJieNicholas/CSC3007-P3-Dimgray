@@ -31,7 +31,7 @@ month_data <- dataset %>%
 
 ```
 
-#plot
+# define color and scale
 
 ```{r}
 # Pivot longer for heatmap generation
@@ -43,12 +43,7 @@ long_data <- month_data %>%
          Month = factor(Month, levels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")),
          Date = as.Date(paste(Year, Month, "01", sep = "-"), format = "%Y-%b-%d"))
 
-```
-
-# Generate heatmap
-```{r}
-
-
+# Adjust the data series names for better readability
 long_data <- long_data %>%
   mutate(`Data Series` = case_when(
     `Data Series` == "Miscellaneous Goods & Services" ~ "Miscellaneous\nGoods & Services",
@@ -56,6 +51,7 @@ long_data <- long_data %>%
     `Data Series` == "Food Excl Food Serving Services" ~ "Food Excl Food\nServing Services",
     TRUE ~ as.character(`Data Series`)
   ))
+
 
 
 # Define custom color scale
@@ -66,8 +62,14 @@ color_scale <- scale_fill_gradientn(
   limits = c(min(long_data$Percent_Change, na.rm = TRUE), max(long_data$Percent_Change, na.rm = TRUE)),  # Dynamic limits
   breaks = seq(floor(min(long_data$Percent_Change, na.rm = TRUE)), ceiling(max(long_data$Percent_Change, na.rm = TRUE)), by = 3),  # Adjust breaks dynamically
   labels = as.character(seq(floor(min(long_data$Percent_Change, na.rm = TRUE)), ceiling(max(long_data$Percent_Change, na.rm = TRUE)), by = 3))  # Adjust labels dynamically
-
 )
+```
+
+# Generate heatmap
+```{r}
+
+
+
 
 # Generate heatmap with customized color and spacing
 ggplot(long_data, aes(x = Date, y = `Data Series`, fill = Percent_Change)) +
@@ -146,8 +148,7 @@ combined_data <- combined_data %>% filter(!is.na(Month))
 print(combined_data)
 ```
 
-
-
+# CFI 2013 heatmap
 ```{r}
 
 # Generate the heatmap including the average row
@@ -170,6 +171,82 @@ heatmap_with_average <- ggplot(combined_data, aes(x = Month, y = `Data Series`))
         legend.spacing.x = unit(0, "cm"),
         legend.spacing.y = unit(0.5, "cm"),
         plot.margin = unit(c(1, 1, 1, 1), "cm"))
+
+# Display the heatmap with the average row
+print(heatmap_with_average)
+```
+
+# CFI 2013 heatmap old
+```{r}
+colors <- c("#03b0f0", "#89d9fa", "#fee400", "#f7801c", "#bb1211")
+breaks <- c(-3, 0, 3, 6, 9, 12)
+labels <- as.character(breaks)
+
+
+# Create a vector of month abbreviations
+month_abbr <- c("J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D", "Average")
+
+
+combined_data <- combined_data %>%
+  mutate(is_average = if_else(Month == "Average", TRUE, FALSE))
+# Generate the heatmap without displaying numbers in the average column
+heatmap_with_average <- ggplot(combined_data, aes(x = Month, y = `Data Series`)) +
+  geom_tile(aes(fill = Percent_Change), color = "white", size = 1) +  # Use white fill and black border for each tile
+  scale_fill_stepsn(colors = colors, breaks = breaks, labels = labels, name = "Percentage change, year on year",
+                    limits = c(min(breaks), max(breaks))) +
+  geom_text(aes(label = ifelse(FALSE, round(Percent_Change, 1), "")), size = 3, color = "black") +  # No text labels for average column
+  labs(title = "Percent Change In Consumer Price Index (CPI) Over Corresponding Period Of Previous Year, 2023",
+       x = "", y = "") +
+  scale_x_discrete(labels = month_abbr) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),  # Rotate x-axis labels
+        axis.text.y = element_text(size = 8),  # Adjust y-axis label size
+        plot.title = element_text(size = 20), 
+        legend.title = element_text(size = 10),  # Customize legend title size
+        legend.text = element_text(size = 10),
+        legend.position = "top",
+        legend.direction = "horizontal",
+        legend.key.height = unit(0.5, "cm"),
+        legend.key.width = unit(1, "cm"),
+        legend.spacing.x = unit(0, "cm"),
+        legend.spacing.y = unit(0.5, "cm"),
+        plot.margin = unit(c(1, 1, 1, 1), "cm")) +
+  guides(fill = guide_colorbar(title.position = "top", title.hjust = 0.5))
+# Display the heatmap with the average row
+print(heatmap_with_average)
+
+
+```
+# 2023 improved heatmap
+
+```{r}
+
+combined_data <- combined_data %>%
+  mutate(is_average = if_else(Month == "Average", TRUE, FALSE))
+
+# Generate the heatmap including the average row
+heatmap_with_average <- ggplot(combined_data, aes(x = Month, y = `Data Series`)) +
+  geom_tile(aes(fill = Percent_Change), color = "white", size = 1) +  # Use white fill and black border for each tile
+  scale_fill_stepsn(colors = colors, breaks = breaks, labels = labels, name = "Percentage change, year on year", 
+                    limits = c(min(breaks), max(breaks))) +
+  geom_text(aes(label = ifelse(is_average, round(Percent_Change, 1), "")), size = 3, color = "black") +  # Add text labels for percent change only for average
+  labs(title = "Percent Change In Consumer Price Index (CPI) Over Corresponding Period Of Previous Year, 2023",
+       x = "", y = "") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),  # Rotate x-axis labels
+        axis.text.y = element_text(size = 8),  # Adjust y-axis label size
+        plot.title = element_text(size = 20), 
+        legend.title = element_text(size = 10),  # Customize legend title size
+        legend.text = element_text(size = 10),
+        legend.position = "top",
+        legend.direction = "horizontal",
+        legend.key.height = unit(0.5, "cm"),
+        legend.key.width = unit(1, "cm"),
+        legend.spacing.x = unit(0, "cm"),
+        legend.spacing.y = unit(0.5, "cm"),
+        plot.margin = unit(c(1, 1, 1, 1), "cm")) +
+  guides(fill = guide_colorbar(title.position = "top", title.hjust = 0.5))
+
 
 # Display the heatmap with the average row
 print(heatmap_with_average)
