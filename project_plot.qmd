@@ -79,14 +79,13 @@ ggplot(long_data, aes(x = Date, y = `Data Series`, fill = Percent_Change)) +
     breaks = seq.Date(from = min(long_data$Date, na.rm = TRUE), to = max(long_data$Date, na.rm = TRUE), by = "6 months"),
     date_labels = "%b %Y"
   )+
-  # more space between y-axis elements
-  labs(title = "Percent Change In Consumer Price Index (CPI) Over Corresponding Period Of Previous Year, Monthly",
+  labs(title = "Percent Change In Consumer Price Index (CPI) From 2019 to 2023",
        x = NULL, y = NULL, fill = "Percent Change") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  theme(plot.title = element_text(size = 15), 
+  theme(plot.title = element_text(size = 12), 
         axis.text.x = element_text(size = 10), 
-        axis.text.y = element_text(size = 10, margin = margin(0, 0, 0, 20)),  # Add margin to y-axis text
+        axis.text.y = element_text(size = 10, margin = margin(0, 0, 0, 20)), 
         legend.title = element_text(size = 10),
         legend.text = element_text(size = 10)) +
   theme(plot.margin = unit(c(0, 0, 0, 0), "cm")) +
