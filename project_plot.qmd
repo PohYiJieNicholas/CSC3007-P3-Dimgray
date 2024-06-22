@@ -74,12 +74,16 @@ color_scale <- scale_fill_gradientn(
 # Generate heatmap with customized color and spacing
 ggplot(long_data, aes(x = Date, y = `Data Series`, fill = Percent_Change)) +
   geom_tile(color = "white", size = 0.2) +  # Add spacing between tiles
-  geom_vline(xintercept = as.numeric(as.Date("2020-04-01")), color = "black", linetype = "solid", size = 0.8) +  # circuit breaker lockdown 
-  geom_vline(xintercept = as.numeric(as.Date("2023-02-13")), color = "black", linetype = "solid", size = 0.8) +  # fully release
+  geom_vline(xintercept = as.numeric(as.Date("2020-04-01")), color = "Red", linetype = "solid", size = 0.8) +  # circuit breaker lockdown 
+  geom_vline(xintercept = as.numeric(as.Date("2023-02-13")), color = "Green", linetype = "solid", size = 0.8) +  # fully release
   color_scale +
   scale_x_date(
     breaks = seq.Date(from = min(long_data$Date, na.rm = TRUE), to = max(long_data$Date, na.rm = TRUE), by = "6 months"),
     date_labels = "%b %Y"
+  )+  scale_color_manual(
+    name = "Events",
+    values = c("Circuit Breaker Lockdown" = "red", "Fully Release" = "green"),
+    guide = guide_legend(override.aes = list(linetype = "solid", size = 1))
   )+
   labs(title = "Percent Change In Consumer Price Index (CPI) From 2019 to 2023",
        x = NULL, y = NULL, fill = "Percent Change") +
@@ -94,7 +98,71 @@ ggplot(long_data, aes(x = Date, y = `Data Series`, fill = Percent_Change)) +
   theme(legend.position = "bottom") +
   theme(legend.key.size = unit(1, "cm")) +
   theme(legend.key.width = unit(1, "cm"))
+
+
 ```
+
+# add legend for the lines
+```{r}
+ggplot(long_data, aes(x = Date, y = `Data Series`, fill = Percent_Change)) +
+  geom_tile(color = "white", size = 0.2) +  # Add spacing between tiles
+  geom_vline(aes(xintercept = as.numeric(as.Date("2020-04-01")), color = "Circuit Breaker Lockdown"), linetype = "solid", size = 0.8, show.legend = TRUE) +  # Circuit breaker lockdown
+  geom_vline(aes(xintercept = as.numeric(as.Date("2023-02-13")), color = "Fully Release"), linetype = "solid", size = 0.8, show.legend = TRUE) +  # Fully release
+  color_scale +
+  scale_x_date(
+    breaks = seq.Date(from = min(long_data$Date, na.rm = TRUE), to = max(long_data$Date, na.rm = TRUE), by = "6 months"),
+    date_labels = "%b %Y"
+  ) +
+  scale_color_manual(
+    name = "Events",
+    values = c("Circuit Breaker Lockdown" = "red", "Fully Release" = "green"),
+    guide = guide_legend(
+      title.position = "top",
+      override.aes = list(
+        linetype = "solid",
+        size = 1,
+        color = c("red", "green"),
+        keyheight = unit(1, "lines"),
+        keywidth = unit(1, "lines")
+      )
+    )
+  ) +
+  labs(title = "Percent Change In Consumer Price Index (CPI) From 2019 to 2023",
+       x = NULL, y = NULL, fill = "Percent Change") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme(plot.title = element_text(size = 12), 
+        axis.text.x = element_text(size = 10), 
+        axis.text.y = element_text(size = 10, margin = margin(0, 0, 0, 20)), 
+        legend.title = element_text(size = 10),
+        legend.text = element_text(size = 10)) +
+  theme(plot.margin = unit(c(0, 0, 0, 0), "cm")) +
+  theme(legend.position = "bottom",
+        legend.box = "horizontal",
+        legend.box.just = "top",
+        legend.title.align = 0.5,
+        legend.text.align = 0.5,
+        legend.key.size = unit(1, "cm"),
+        legend.key.width = unit(1, "cm")) +
+  guides(
+    fill = guide_colorbar(title.position = "top", barwidth = 10, barheight = 0.5),
+    color = guide_legend(
+      title.position = "top",
+      label.position = "bottom",
+      override.aes = list(
+        linetype = "solid",
+        size = 1,
+        color = c("red", "green"),
+        keyheight = unit(2, "lines"),
+        keywidth = unit(1, "lines")
+      )
+    )
+  )
+
+
+```
+
+
 ```{r}
 
 # Filter for 2023 data
