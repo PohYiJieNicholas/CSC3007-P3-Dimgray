@@ -1,25 +1,206 @@
 ---
-title: "P3-Assignment-Dimgray-Poster"
-format: html
+title: "Percent Change In Consumer Price Index (CPI) of year 2023"
+format:
+  poster-typst: 
+    size: "33x23" # Approximately A1
+    poster-authors: "Jared Teo, Nicholas Poh, Oliver Choy, WuJie, Nicole, Kurt"
+    departments: "Information and Communication Technologies"
+    institution-logo: "./images/sit-logo.png"
+    footer-text: "Information Visualization 2024"
+    footer-emails: "2101720@sit.singaporetech.edu.sg, *insert email here*"
+
+execute:
+  echo: false
+knitr:
+  opts_chunk:
+    dev: svglite
 ---
 
-## Quarto
-
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
 ```{r}
-1 + 1
+#| label: setup
+#| include: false
+
+# Load necessary libraries
+library(tidyverse)
+library(lubridate)
+library(ggplot2)
+library(knitr)
+
 ```
 
-You can add options to executable code like this 
+
+# Introduction
+
+Inflation in Singapore has moderated over 2023, prices are still above pre-pandemic levels and expected to remain elevated in 2024 after the 7 per cent rise in public transport fares, a second round of goods and services tax (GST) hike and carbon tax adjustments kick in.[^straitstimes].The average price increase in 2023 ranged between 2 per cent for household durables and services, and just over 6 per cent for food, transport, recreation and cultures. Further more, there are 10 items that have on average seen double-digit price increases in 2023.[^straitstimes]
+
+[^straitstimes]: <https://www.straitstimes.com/business/prices-in-s-pore-seen-moderating-but-likely-to-remain-above-pandemic-levels-in-2024>
+
+Economist states that the inflation in 2023 was largely from external factors such as the the reopening of economies, the impact of the Ukraine-Russia war and the post-Covid-19 supply chain disruption and restructuring. The economist however are not concerned due to the central bank's strong Singapore dollar policy to help manage imported inflation. This would help keep the incoming price increases manageable. Overall, however, the recent GST hike and rise in consumper prices will affect individuals from different income groups. Even with the government's support packages, the lower- to middle-income are expected to make some adjustments to their lifestyles. [^straitstimes]
+
+
+[^straitstimes]: <https://www.straitstimes.com/business/prices-in-s-pore-seen-moderating-but-likely-to-remain-above-pandemic-levels-in-2024>
+
+
+# Previous Visualization
 
 ```{r}
+#| label: fig-wsj-on-poster
+#| fig-cap: "Heat map of inflationary impact on key itens iver 2023, published by the
+#|   Straights Times."
+#| out-width: 60%
+
+include_graphics("images/price_index.png")
+```
+
+[^straitstimes]: <https://www.straitstimes.com/business/prices-in-s-pore-seen-moderating-but-likely-to-remain-above-pandemic-levels-in-2024>
+
+# Strengths
+
+*   The heat map effectively highlights the items and the month when inflation effects were most pronounced.
+*   The color legend provides a clear indication of the inflation rate for each item and month.
+*   The infotip provides additional information about the inflation rate for each item and month.
+
+
+
+# Suggested Improvements 
+
+1.  
+1.  
+1.  
+1.  
+1.  
+1.  
+1.  
+1.  
+1.  
+[^colorbrewer]: <https://colorbrewer2.org/#type=sequential&scheme=Reds&n=5>
+    
+    
+# Implementation
+
+
+## Data
+
+*   Percent change in consumer price index over corresponding period of previous year, 2019 as base year, Annual.[^CPI_Base_Year_2019_Yearly] 
+*   Percent change in consumer price index over corresponding period of previous year, 2019 as base year, Monthly[^CPI_Base_Year_2019_Monthly] 
+
+[^CPI_Base_Year_2019_Yearly]: <https://tablebuilder.singstat.gov.sg/table/TS/M212941>
+[^CPI_Base_Year_2019_Monthly]: <https://tablebuilder.singstat.gov.sg/table/TS/M212911>
+
+
+## Software
+
+We used the Quarto publication framework and the R programming language, along with the following third-party packages:
+
+*   *tidyverse* for data transformation, including *ggplot2* for visualization
+    based on the grammar of graphics
+*   *lubridate* *insert description here*
+
+
+```{=typst}
+#v(2em)
+```
+
+```{r}
+#| label: read-data
+#| include: false
 #| echo: false
-2 * 2
+# Load the dataset
+dataset <- read_csv("M212911.csv", skip = 10)
+dataset <- dataset[1:152,]
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+```{r}
+#| label: preprocess-data
+#| include: false
+#| echo: false
+
+# Convert relevant columns to numeric
+dataset <- dataset %>%
+  mutate(across(matches("^2019|^2020|^2021|^2022|^2023"), ~ as.numeric(as.character(.))))
+
+month_data <- dataset %>%
+  filter(`Data Series` %in% c("Food", "Food Excl Food Serving Services", "Clothing & Footwear", "Housing & Utilities", "Household Durables & Services", "Health Care", "Transport", "Communication", "Recreation & Culture", "Education", "Miscellaneous Goods & Services", "All Items")) %>%
+  select(`Data Series`, matches("^2019|^2020|^2021|^2022|^2023"))
+```
+
+```{r}
+#| label: color-scale
+#| include: false
+#| echo: false
+
+# Pivot longer for heatmap generation
+long_data <- month_data %>%
+  pivot_longer(cols = matches("^2019|^2020|^2021|^2022|^2023"), 
+               names_to = "Year_Month", values_to = "Percent_Change") %>%
+  separate(Year_Month, into = c("Year", "Month"), sep = " ") %>%
+  mutate(Year = as.integer(Year), 
+         Month = factor(Month, levels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")),
+         Date = as.Date(paste(Year, Month, "01", sep = "-"), format = "%Y-%b-%d"))
+
+# Adjust the data series names for better readability
+long_data <- long_data %>%
+  mutate(`Data Series` = case_when(
+    `Data Series` == "Miscellaneous Goods & Services" ~ "Miscellaneous\nGoods & Services",
+    `Data Series` == "Household Durables & Services" ~ "Household Durables\n& Services",
+    `Data Series` == "Food Excl Food Serving Services" ~ "Food Excl Food\nServing Services",
+    TRUE ~ as.character(`Data Series`)
+  ))
+
+
+
+# Define custom color scale
+color_scale <- scale_fill_gradientn(
+   colors = c("#003f5c","#2f4b7c","#03b0f0", "#89d9fa", "#fee400", "#f7801c", "#bb1211", "#7a0c0a", "#440606"),
+  #colors = c("#03b0f0", "#89d9fa", "#fee400", "#f7801c", "#bb1211"),
+  values = scales::rescale(c(min(long_data$Percent_Change, na.rm = TRUE), -3, 0, 3, 6, 9, 12, max(long_data$Percent_Change, na.rm = TRUE))),  # Define breakpoints dynamically
+  limits = c(min(long_data$Percent_Change, na.rm = TRUE), max(long_data$Percent_Change, na.rm = TRUE)),  # Dynamic limits
+  breaks = seq(floor(min(long_data$Percent_Change, na.rm = TRUE)), ceiling(max(long_data$Percent_Change, na.rm = TRUE)), by = 3),  # Adjust breaks dynamically
+  labels = as.character(seq(floor(min(long_data$Percent_Change, na.rm = TRUE)), ceiling(max(long_data$Percent_Change, na.rm = TRUE)), by = 3))  # Adjust labels dynamically
+)
+```
+
+
+# Improved Visualization
+
+```{r}
+#| label: fig-ggplot
+#| fig-cap: "Revised visualization of inflation increase in Singapore by essentail items and year/month."
+#| fig-width: 6.0
+#| fig-height: 5.8
+#| out-width: 100%
+
+# Generate heatmap with customized color and spacing
+ggplot(long_data, aes(x = Date, y = `Data Series`, fill = Percent_Change)) +
+  geom_tile(color = "white", size = 0.2) +  # Add spacing between tiles
+  geom_vline(xintercept = as.numeric(as.Date("2020-04-01")), color = "black", linetype = "solid", size = 0.8) +  # circuit breaker lockdown 
+  geom_vline(xintercept = as.numeric(as.Date("2023-02-13")), color = "black", linetype = "solid", size = 0.8) +  # fully release
+  color_scale +
+  scale_x_date(
+    breaks = seq.Date(from = min(long_data$Date, na.rm = TRUE), to = max(long_data$Date, na.rm = TRUE), by = "6 months"),
+    date_labels = "%b %Y"
+  )+
+  labs(title = "Percent Change In Consumer Price Index (CPI) From 2019 to 2023",
+       x = NULL, y = NULL, fill = "Percent Change") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme(plot.title = element_text(size = 12), 
+        axis.text.x = element_text(size = 10), 
+        axis.text.y = element_text(size = 10, margin = margin(0, 0, 0, 20)), 
+        legend.title = element_text(size = 10),
+        legend.text = element_text(size = 10)) +
+  theme(plot.margin = unit(c(0, 0, 0, 0), "cm")) +
+  theme(legend.position = "bottom") +
+  theme(legend.key.size = unit(1, "cm")) +
+  theme(legend.key.width = unit(1, "cm"))
+```
+
+
+# Further Suggestions for Interactivity
+
+
+
+
+# Conclusion
+
+.
