@@ -3,55 +3,86 @@ title: "data_prep"
 author: "wujie"
 format: html
 ---
+# Introduction
 
+This document contains the data engineering required to reconstruct and improve the plot by @Straits_Times, as shown in @fig-1, depicting inflation of prices in Singapore in 2023.
+
+The code below requires the following packages:
 ```{r}
 # Load necessary libraries
 library(tidyverse)
 library(lubridate)
 library(ggplot2)
+library(knitr)
+library(readxl)
 ```
 
+```{r}
+#| label: fig-1
+#| echo: false
+#| fig.cap: "Heat map of inflationary impact on key itens iver 2023, published by the
+#|   Straights Times."
+
+include_graphics("images/price_index.png")
+```
+
+@Straits_Times based their visualization on data by @Department_of_Statistics_Singapore, available in CSV format with each row representing the inflation rate of each item by month. The relevant column for data processing include:
+
+*   `Data Series`: The category of the item, such as "Food," "Clothing & Footwear," etc.
 
 # load dataset
 ```{r}
+#| label: load-dataset
+#| message: false
+
 # Load the dataset
 dataset <- read_csv("M212911.csv", skip = 10)
 dataset <- dataset[1:152,]
+dataset
 ```
+
+For further processing of the data, we will convert the relevant columns to numeric format and filter the data to include only the relevant categories for the heatmap.
 
 # Preprocess data
 ```{r}
+#| label: data-preprocess
+#| message: false
+
 # Convert relevant columns to numeric
-dataset <- dataset %>%
+dataset <- dataset|>
   mutate(across(matches("^2019|^2020|^2021|^2022|^2023"), ~ as.numeric(as.character(.))))
+is.numeric(dataset$`2023 Jan`)
 
-month_data <- dataset %>%
-  filter(`Data Series` %in% c("Food", "Food Excl Food Serving Services", "Clothing & Footwear", "Housing & Utilities", "Household Durables & Services", "Health Care", "Transport", "Communication", "Recreation & Culture", "Education", "Miscellaneous Goods & Services", "All Items")) %>%
+month_data <- dataset|>
+  filter(`Data Series` %in% c("Food", "Food Excl Food Serving Services", "Clothing & Footwear", "Housing & Utilities", "Household Durables & Services", "Health Care", "Transport", "Communication", "Recreation & Culture", "Education", "Miscellaneous Goods & Services", "All Items"))|>
   select(`Data Series`, matches("^2019|^2020|^2021|^2022|^2023"))
-
+month_data
 ```
 
-# define color and scale
+Next, we will pivot the data to a longer format to facilitate the creation of the heatmap. We will also adjust the data series names for better readability. We will also define a custom color scale for the heatmap.
 
+# define color and scale
 ```{r}
+#| label: define-color-scale
+#| message: false
+
 # Pivot longer for heatmap generation
-long_data <- month_data %>%
+long_data <- month_data|>
   pivot_longer(cols = matches("^2019|^2020|^2021|^2022|^2023"), 
-               names_to = "Year_Month", values_to = "Percent_Change") %>%
-  separate(Year_Month, into = c("Year", "Month"), sep = " ") %>%
+               names_to = "Year_Month", values_to = "Percent_Change")|>
+  separate(Year_Month, into = c("Year", "Month"), sep = " ")|>
   mutate(Year = as.integer(Year), 
          Month = factor(Month, levels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")),
          Date = as.Date(paste(Year, Month, "01", sep = "-"), format = "%Y-%b-%d"))
-
 # Adjust the data series names for better readability
-long_data <- long_data %>%
+long_data <- long_data|>
   mutate(`Data Series` = case_when(
     `Data Series` == "Miscellaneous Goods & Services" ~ "Miscellaneous\nGoods & Services",
     `Data Series` == "Household Durables & Services" ~ "Household Durables\n& Services",
     `Data Series` == "Food Excl Food Serving Services" ~ "Food Excl Food\nServing Services",
     TRUE ~ as.character(`Data Series`)
   ))
-
+long_data
 
 
 # Define custom color scale
@@ -65,11 +96,12 @@ color_scale <- scale_fill_gradientn(
 )
 ```
 
+The data are now ready for visualization. The next step will be to create a plot that will allow us to compare the rate of inflation of the relevant items over the years from 2019 to 2023, using the ggplot2 package to create a heatmap.
+
 # Generate heatmap
 ```{r}
-
-
-
+#| label: generate-heatmap
+#| message: false
 
 # Generate heatmap with customized color and spacing
 ggplot(long_data, aes(x = Date, y = `Data Series`, fill = Percent_Change)) +
@@ -166,20 +198,20 @@ ggplot(long_data, aes(x = Date, y = `Data Series`, fill = Percent_Change)) +
 ```{r}
 
 # Filter for 2023 data
-data_2023 <- month_data %>%
+data_2023 <- month_data|>
   select(`Data Series`, matches("^2023"))
 
 # Calculate average change for 2023
-data_2023 <- data_2023 %>%
-  rowwise() %>%
-  mutate(`2023 Average Change` = mean(c_across(matches("^2023")), na.rm = TRUE)) %>%
+data_2023 <- data_2023|>
+  rowwise()|>
+  mutate(`2023 Average Change` = mean(c_across(matches("^2023")), na.rm = TRUE))|>
   ungroup()
 
 # Pivot longer for heatmap generation
-long_data <- data_2023 %>%
+long_data <- data_2023|>
   pivot_longer(cols = matches("^2023"), 
-               names_to = "Year_Month", values_to = "Percent_Change") %>%
-  separate(Year_Month, into = c("Year", "Month"), sep = " ", extra = "drop") %>%
+               names_to = "Year_Month", values_to = "Percent_Change")|>
+  separate(Year_Month, into = c("Year", "Month"), sep = " ", extra = "drop")|>
   mutate(Year = as.integer(Year), 
          Month = factor(Month, levels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")))
 
@@ -194,9 +226,9 @@ labels <- c("-3 to 0", "0 to 3", "3 to 6", "6 to 9", "9 to 12")
 
 ```{r}
 # Prepare data for the average change row
-average_data <- data_2023 %>%
-  select(`Data Series`, `2023 Average Change`) %>%
-  rename(Percent_Change = `2023 Average Change`) %>%
+average_data <- data_2023|>
+  select(`Data Series`, `2023 Average Change`)|>
+  rename(Percent_Change = `2023 Average Change`)|>
   mutate(Month = "Average", Year = 2023)
 
 
@@ -208,7 +240,7 @@ combined_data$Month <- factor(combined_data$Month, levels = c(levels(long_data$M
 
 
 # Filter out any NA values
-combined_data <- combined_data %>% filter(!is.na(Month))
+combined_data <- combined_data|> filter(!is.na(Month))
 
 ```
 
@@ -255,7 +287,7 @@ labels <- as.character(breaks)
 month_abbr <- c("J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D", "Average")
 
 
-combined_data <- combined_data %>%
+combined_data <- combined_data|>
   mutate(is_average = if_else(Month == "Average", TRUE, FALSE))
 # Generate the heatmap without displaying numbers in the average column
 heatmap_with_average <- ggplot(combined_data, aes(x = Month, y = `Data Series`)) +
@@ -289,7 +321,7 @@ print(heatmap_with_average)
 
 ```{r}
 
-combined_data <- combined_data %>%
+combined_data <- combined_data|>
   mutate(is_average = if_else(Month == "Average", TRUE, FALSE))
 
 # Generate the heatmap including the average row
