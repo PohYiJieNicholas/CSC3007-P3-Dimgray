@@ -9,6 +9,7 @@ format: html
 library(tidyverse)
 library(lubridate)
 library(ggplot2)
+library(RColorBrewer)
 ```
 
 
@@ -56,7 +57,10 @@ long_data <- long_data %>%
 
 # Define custom color scale
 color_scale <- scale_fill_gradientn(
-   colors = c("#003f5c","#2f4b7c","#03b0f0", "#89d9fa", "#fee400", "#f7801c", "#bb1211", "#7a0c0a", "#440606"),
+  #colors = c("#003f5c","#2f4b7c","#03b0f0", "#89d9fa", "#fee400", "#f7801c", "#bb1211", "#7a0c0a", "#440606"),
+  #colors = c("#03b0f0", "#89d9fa", "#fee400", "#f7801c", "#bb1211"),
+  colors = rev(brewer.pal(9, "RdYlBu")),
+  #colors = brewer.pal(9, "RdYlBu"),  # Use the RdYlBu palette with 9 colors
   #colors = c("#03b0f0", "#89d9fa", "#fee400", "#f7801c", "#bb1211"),
   values = scales::rescale(c(min(long_data$Percent_Change, na.rm = TRUE), -3, 0, 3, 6, 9, 12, max(long_data$Percent_Change, na.rm = TRUE))),  # Define breakpoints dynamically
   limits = c(min(long_data$Percent_Change, na.rm = TRUE), max(long_data$Percent_Change, na.rm = TRUE)),  # Dynamic limits
@@ -127,8 +131,8 @@ ggplot(long_data, aes(x = Date, y = `Data Series`, fill = Percent_Change)) +
       )
     )
   ) +
-  labs(title = "Percent Change In Consumer Price Index (CPI) From 2019 to 2023",
-       x = NULL, y = NULL, fill = "Percent Change") +
+  labs(title = "Percentage Change In Consumer Price Index (CPI) From 2019 to 2023",
+       x = NULL, y = NULL, fill = "Percentage Change") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   theme(plot.title = element_text(size = 12), 
