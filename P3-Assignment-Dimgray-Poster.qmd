@@ -6,7 +6,7 @@ format:
     poster-authors: "Jared Teo, Nicholas Poh, Oliver Choy, WuJie, Nicole, Kurt"
     departments: "Information and Communication Technologies"
     institution-logo: "./images/sit-logo.png"
-    footer-text: "Information Visualization 2024"
+    footer-text: "Information Visualisation 2024"
     footer-emails: "2101720@sit.singaporetech.edu.sg, *insert email here*"
 
 execute:
@@ -31,11 +31,11 @@ library(knitr)
 
 # Introduction
 
-Inflation in Singapore has moderated over 2023, prices are still above pre-pandemic levels and expected to remain elevated in 2024 after the 7 per cent rise in public transport fares, a second round of goods and services tax (GST) hike and carbon tax adjustments kick in.[^straitstimes].The average price increase in 2023 ranged between 2 per cent for household durables and services, and just over 6 per cent for food, transport, recreation and cultures. Further more, there are 10 items that have on average seen double-digit price increases in 2023.[^straitstimes]
+Inflation in Singapore has moderated over 2023, prices are still above pre-pandemic levels and expected to remain elevated in 2024 after the 7 per cent rise in public transport fares, a second round of Goods and Services Tax (GST) hike and carbon tax adjustments kick in.[^straitstimes].The average price increase in 2023 ranged between 2 per cent for household durables and services, and just over 6 per cent for food, transport, recreation and cultures. Further more, there are 10 items that have, on average, seen double-digit price increases in 2023.[^straitstimes]
 
 [^straitstimes]: <https://www.straitstimes.com/business/prices-in-s-pore-seen-moderating-but-likely-to-remain-above-pandemic-levels-in-2024>
-
-Economist states that the inflation in 2023 was largely from external factors such as the the reopening of economies, the impact of the Ukraine-Russia war and the post-Covid-19 supply chain disruption and restructuring. The economist however are not concerned due to the central bank's strong Singapore dollar policy to help manage imported inflation. This would help keep the incoming price increases manageable. Overall, however, the recent GST hike and rise in consumper prices will affect individuals from different income groups. Even with the government's support packages, the lower- to middle-income are expected to make some adjustments to their lifestyles. [^straitstimes]
+\\
+Economists stated that the inflation in 2023 was largely from external factors such as the the reopening of economies, the impact of the Ukraine-Russia war and the post-Covid-19 supply chain disruption and restructuring. The economists, however, are not concerned due to the central bank's strong Singapore dollar policy to help manage imported inflation. This would help keep the incoming price increases manageable. Overall, however, the recent GST hike and rise in consumer prices will affect individuals from different income groups. Even with the government's support packages, the lower- to middle-income are expected to make some adjustments to their lifestyles. [^straitstimes]
 
 
 [^straitstimes]: <https://www.straitstimes.com/business/prices-in-s-pore-seen-moderating-but-likely-to-remain-above-pandemic-levels-in-2024>
@@ -45,8 +45,8 @@ Economist states that the inflation in 2023 was largely from external factors su
 
 ```{r}
 #| label: fig-wsj-on-poster
-#| fig-cap: "Heat map of inflationary impact on key itens iver 2023, published by the
-#|   Straights Times."
+#| fig-cap: "Heat map of inflationary impact on key itens over 2023, published by the
+#|   Straits Times."
 #| out-width: 60%
 
 include_graphics("images/price_index.png")
@@ -93,7 +93,7 @@ include_graphics("images/price_index.png")
 We used the Quarto publication framework and the R programming language, along with the following third-party packages:
 
 *   *tidyverse* for data transformation, including *ggplot2* for visualization
-    based on the grammar of graphics
+    based on the Grammar of Graphics
 *   *lubridate* *insert description here*
 
 
