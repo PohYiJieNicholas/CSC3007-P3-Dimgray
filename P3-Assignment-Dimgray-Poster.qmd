@@ -64,13 +64,13 @@ include_graphics("images/price_index.png")
 
 # Suggested Improvements 
 
-1.  
-1.  
-1.  
-1.  
-1.  
-1.  
-1.  
+1. Increase the maximum and minimum values in the legend to 18 and -9, respectively, to accurately reflect the range of values in the dataset.
+2. Add more legend breaks and colors to enhance the contrast in percentage changes in the CPI.
+3. Show the trend over the past five years, rather than focusing solely on 2023.
+4. Include event breaklines to highlight changes before, during, and after the circuit breaker lockdown.
+5. Utilize diverging palettes to clearly indicate positive and negative percentage changes in the CPI.
+6. Incorporate data for the month of December to compute the overall annual average, as December may show significant changes compared to January to November.
+7. Add a source note to the plot, allowing readers to easily reference the data source.
 1.  
 1.  
 [^colorbrewer]: <https://colorbrewer2.org/#type=sequential&scheme=Reds&n=5>
