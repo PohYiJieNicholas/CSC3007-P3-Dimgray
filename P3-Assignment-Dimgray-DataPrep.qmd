@@ -119,13 +119,13 @@ ggplot(long_data, aes(x = Date, y = `Data Series`, fill = Percent_Change)) +
   ) +
   scale_color_manual(
     name = "Events",
-    values = c("Circuit Breaker Lockdown" = "red", "Fully Release" = "green"),
+    values = c("Circuit Breaker Lockdown" = "red", "Fully Release" = "#006400"),
     guide = guide_legend(
       title.position = "top",
       override.aes = list(
         linetype = "solid",
         size = 1,
-        color = c("red", "green"),
+        color = c("red", "#006400"),
         keyheight = unit(1, "lines"),
         keywidth = unit(1, "lines")
       )
@@ -156,7 +156,7 @@ ggplot(long_data, aes(x = Date, y = `Data Series`, fill = Percent_Change)) +
       override.aes = list(
         linetype = "solid",
         size = 1,
-        color = c("red", "green"),
+        color = c("red", "#006400"),
         keyheight = unit(2, "lines"),
         keywidth = unit(1, "lines")
       )
