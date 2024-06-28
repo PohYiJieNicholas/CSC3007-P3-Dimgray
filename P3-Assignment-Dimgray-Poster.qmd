@@ -34,7 +34,7 @@ library(knitr)
 Inflation in Singapore has moderated over 2023, prices are still above pre-pandemic levels and expected to remain elevated in 2024 after the 7 per cent rise in public transport fares, a second round of Goods and Services Tax (GST) hike and carbon tax adjustments kick in.[^straitstimes].The average price increase in 2023 ranged between 2 per cent for household durables and services, and just over 6 per cent for food, transport, recreation and cultures. Further more, there are 10 items that have, on average, seen double-digit price increases in 2023.[^straitstimes]
 
 [^straitstimes]: <https://www.straitstimes.com/business/prices-in-s-pore-seen-moderating-but-likely-to-remain-above-pandemic-levels-in-2024>
-\\
+
 Economists stated that the inflation in 2023 was largely from external factors such as the the reopening of economies, the impact of the Ukraine-Russia war and the post-Covid-19 supply chain disruption and restructuring. The economists, however, are not concerned due to the central bank's strong Singapore dollar policy to help manage imported inflation. This would help keep the incoming price increases manageable. Overall, however, the recent GST hike and rise in consumer prices will affect individuals from different income groups. Even with the government's support packages, the lower- to middle-income are expected to make some adjustments to their lifestyles. [^straitstimes]
 
 
@@ -165,12 +165,12 @@ color_scale <- scale_fill_gradientn(
 
 ```{r}
 #| label: fig-ggplot
-#| fig-cap: "Revised visualization of inflation increase in Singapore by essentail items and year/month."
+#| fig-cap: "Revised visualization of inflation increase in Singapore by essential items and year/month."
 #| fig-width: 6.0
 #| fig-height: 5.8
 #| out-width: 100%
 
-# Generate heatmap with customized color and spacing
+# Generate heatmap with customised color and spacing
 ggplot(long_data, aes(x = Date, y = `Data Series`, fill = Percent_Change)) +
   geom_tile(color = "white", size = 0.2) +  # Add spacing between tiles
   geom_vline(xintercept = as.numeric(as.Date("2020-04-01")), color = "black", linetype = "solid", size = 0.8) +  # circuit breaker lockdown 
