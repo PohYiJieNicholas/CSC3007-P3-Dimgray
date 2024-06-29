@@ -1,11 +1,4 @@
----
-title: "Data Preparation"
-author: "Jared Teo, Nicholas Poh, Oliver Choy, WuJie, Nicole, Kurt"
-format: html
----
-
-# Required Packages
-```{r}
+## -----------------------------------------------------------------------------
 #| label: required_packages
 #| message: false
 #| warning: false
@@ -14,11 +7,9 @@ library(tidyverse)
 library(lubridate)
 library(ggplot2)
 library(RColorBrewer)
-```
 
 
-# Read data
-```{r}
+## -----------------------------------------------------------------------------
 #| label: read-data
 #| message: false
 #| warning: false
@@ -27,10 +18,9 @@ library(RColorBrewer)
 # Load the dataset
 dataset <- read_csv("M212911.csv", skip = 10)
 dataset <- dataset[1:152,]
-```
 
-# Preprocess Data
-```{r}
+
+## -----------------------------------------------------------------------------
 #| label: preprocess-data
 #| message: false
 #| warning: false
@@ -42,10 +32,9 @@ dataset <- dataset %>%
 month_data <- dataset %>%
   filter(`Data Series` %in% c("Food", "Food Excl Food Serving Services", "Clothing & Footwear", "Housing & Utilities", "Household Durables & Services", "Health Care", "Transport", "Communication", "Recreation & Culture", "Education", "Miscellaneous Goods & Services", "All Items")) %>%
   select(`Data Series`, matches("^2019|^2020|^2021|^2022|^2023"))
-```
 
-# Pivot Longer
-```{r}
+
+## -----------------------------------------------------------------------------
 #| label: pivot_longer
 #| message: false
 #| warning: false
@@ -59,10 +48,9 @@ long_data <- month_data %>%
          Month = factor(Month, levels = c(month.abb, "Overall_Avg")),  # Add "Overall_Avg" as the 14th month
          Month_Index = as.numeric(factor(Month, levels = c(month.abb, "Overall_Avg"))),
          Year_Month_Index = paste(Year, sprintf("%02d", Month_Index), sep = "-"))
-```
 
-# Calculate Overall Averages
-```{r}
+
+## -----------------------------------------------------------------------------
 #| label: overall_averages
 #| message: false
 #| warning: false
@@ -73,10 +61,9 @@ overall_averages <- long_data %>%
   summarize(Percent_Change = mean(Percent_Change, na.rm = TRUE), .groups = 'drop') %>%
   mutate(Year = 2023, Month = "Overall_Avg", Month_Index = 14, Year_Month_Index = "2023-14")  # Use month index 14 for "Overall_Avg"
 
-```
 
-# Add Gaps
-```{r}
+
+## -----------------------------------------------------------------------------
 #| label: add_gaps
 #| message: false
 #| warning: false
@@ -88,11 +75,9 @@ gap_data_before_avg <- overall_averages %>%
 
 gap_data_after_avg <- overall_averages %>%
   mutate(Month = "Gap", Month_Index = 15, Year_Month_Index = "2023-15", Percent_Change = NA)
-```
 
 
-# Color Scale
-```{r}
+## -----------------------------------------------------------------------------
 #| label: color_scale
 #| message: false
 #| warning: false
@@ -111,10 +96,9 @@ color_scale <- scale_fill_gradientn(
   labels = as.character(seq(floor(min(combined_data$Percent_Change, na.rm = TRUE)), ceiling(max(combined_data$Percent_Change, na.rm = TRUE)), by = 3)),  # Adjust labels dynamically
   na.value = "white"  # Set color for NA values
   )
-```
 
-# Adjust Data Series Names
-```{r}
+
+## -----------------------------------------------------------------------------
 #| label: adjust_series_name
 #| message: false
 #| warning: false
@@ -129,10 +113,9 @@ combined_data <- combined_data %>%
     TRUE ~ as.character(`Data Series`)
   ))
 
-```
 
-# Generate x-axis breaks and labels
-```{r}
+
+## -----------------------------------------------------------------------------
 #| label: breaks_labels
 #| message: false
 #| warning: false
@@ -159,4 +142,4 @@ x_labels <- combined_data %>%
     TRUE ~ month.abb[Month_Index]
   )) %>%
   pull(Label)
-```
+
