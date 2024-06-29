@@ -6,7 +6,7 @@ format:
     poster-authors: "Jared Teo, Nicholas Poh, Oliver Choy, WuJie, Nicole, Kurt"
     departments: "Information and Communication Technologies"
     institution-logo: "./images/sit-logo.png"
-    footer-text: "Information Visualization 2024"
+    footer-text: "Information Visualisation 2024"
     footer-emails: "2101720@sit.singaporetech.edu.sg, *insert email here*"
 
 execute:
@@ -25,17 +25,18 @@ library(tidyverse)
 library(lubridate)
 library(ggplot2)
 library(knitr)
+library(RColorBrewer)
 
 ```
 
 
 # Introduction
 
-Inflation in Singapore has moderated over 2023, prices are still above pre-pandemic levels and expected to remain elevated in 2024 after the 7 per cent rise in public transport fares, a second round of goods and services tax (GST) hike and carbon tax adjustments kick in.[^straitstimes].The average price increase in 2023 ranged between 2 per cent for household durables and services, and just over 6 per cent for food, transport, recreation and cultures. Further more, there are 10 items that have on average seen double-digit price increases in 2023.[^straitstimes]
+Inflation in Singapore has moderated over 2023, prices are still above pre-pandemic levels and expected to remain elevated in 2024 after the 7 per cent rise in public transport fares, a second round of Goods and Services Tax (GST) hike and carbon tax adjustments kick in.[^straitstimes].The average price increase in 2023 ranged between 2 per cent for household durables and services, and just over 6 per cent for food, transport, recreation and cultures. Further more, there are 10 items that have, on average, seen double-digit price increases in 2023.[^straitstimes]
 
 [^straitstimes]: <https://www.straitstimes.com/business/prices-in-s-pore-seen-moderating-but-likely-to-remain-above-pandemic-levels-in-2024>
 
-Economist states that the inflation in 2023 was largely from external factors such as the the reopening of economies, the impact of the Ukraine-Russia war and the post-Covid-19 supply chain disruption and restructuring. The economist however are not concerned due to the central bank's strong Singapore dollar policy to help manage imported inflation. This would help keep the incoming price increases manageable. Overall, however, the recent GST hike and rise in consumper prices will affect individuals from different income groups. Even with the government's support packages, the lower- to middle-income are expected to make some adjustments to their lifestyles. [^straitstimes]
+Economists stated that the inflation in 2023 was largely from external factors such as the the reopening of economies, the impact of the Ukraine-Russia war and the post-Covid-19 supply chain disruption and restructuring. The economists, however, are not concerned due to the central bank's strong Singapore dollar policy to help manage imported inflation. This would help keep the incoming price increases manageable. Overall, however, the recent GST hike and rise in consumer prices will affect individuals from different income groups. Even with the government's support packages, the lower- to middle-income are expected to make some adjustments to their lifestyles. [^straitstimes]
 
 
 [^straitstimes]: <https://www.straitstimes.com/business/prices-in-s-pore-seen-moderating-but-likely-to-remain-above-pandemic-levels-in-2024>
@@ -45,8 +46,8 @@ Economist states that the inflation in 2023 was largely from external factors su
 
 ```{r}
 #| label: fig-wsj-on-poster
-#| fig-cap: "Heat map of inflationary impact on key itens iver 2023, published by the
-#|   Straights Times."
+#| fig-cap: "Heat map of inflationary impact on key itens over 2023, published by the
+#|   Straits Times."
 #| out-width: 60%
 
 include_graphics("images/price_index.png")
@@ -93,7 +94,7 @@ include_graphics("images/price_index.png")
 We used the Quarto publication framework and the R programming language, along with the following third-party packages:
 
 *   *tidyverse* for data transformation, including *ggplot2* for visualization
-    based on the grammar of graphics
+    based on the Grammar of Graphics
 *   *lubridate* *insert description here*
 
 
@@ -135,11 +136,41 @@ long_data <- month_data %>%
                names_to = "Year_Month", values_to = "Percent_Change") %>%
   separate(Year_Month, into = c("Year", "Month"), sep = " ") %>%
   mutate(Year = as.integer(Year), 
-         Month = factor(Month, levels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")),
-         Date = as.Date(paste(Year, Month, "01", sep = "-"), format = "%Y-%b-%d"))
+         Month = factor(Month, levels = c(month.abb, "Overall_Avg")),  # Add "Overall_Avg" as the 14th month
+         Month_Index = as.numeric(factor(Month, levels = c(month.abb, "Overall_Avg"))),
+         Year_Month_Index = paste(Year, sprintf("%02d", Month_Index), sep = "-"))
+
+# Calculate the overall average for each data series from 2019 to 2023
+overall_averages <- long_data %>%
+  filter(Year >= 2019 & Year <= 2023) %>%
+  group_by(`Data Series`) %>%
+  summarize(Percent_Change = mean(Percent_Change, na.rm = TRUE), .groups = 'drop') %>%
+  mutate(Year = 2023, Month = "Overall_Avg", Month_Index = 14, Year_Month_Index = "2023-14")  # Use month index 14 for "Overall_Avg"
+
+
+# Add a small gap before and after "Overall_Avg"
+gap_data_before_avg <- overall_averages %>%
+  mutate(Month = "Gap", Month_Index = 13, Year_Month_Index = "2023-13", Percent_Change = NA)
+
+gap_data_after_avg <- overall_averages %>%
+  mutate(Month = "Gap", Month_Index = 15, Year_Month_Index = "2023-15", Percent_Change = NA)
+
+# Combine the original data with the overall averages and the gaps
+combined_data <- bind_rows(long_data, overall_averages, gap_data_before_avg, gap_data_after_avg) %>%
+  arrange(Year, Month_Index)
+
+
+color_scale <- scale_fill_gradientn(
+  colors = rev(brewer.pal(9, "RdYlBu")),  # Use the RdYlBu palette with 9 colors in reverse order
+  values = scales::rescale(c(min(combined_data$Percent_Change, na.rm = TRUE), -3, 0, 3, 6, 9, 12, max(combined_data$Percent_Change, na.rm = TRUE))),  # Define breakpoints dynamically
+  limits = c(min(combined_data$Percent_Change, na.rm = TRUE), max(combined_data$Percent_Change, na.rm = TRUE)),  # Dynamic limits
+  breaks = seq(floor(min(combined_data$Percent_Change, na.rm = TRUE)), ceiling(max(combined_data$Percent_Change, na.rm = TRUE)), by = 3),  # Adjust breaks dynamically
+  labels = as.character(seq(floor(min(combined_data$Percent_Change, na.rm = TRUE)), ceiling(max(combined_data$Percent_Change, na.rm = TRUE)), by = 3)),  # Adjust labels dynamically
+  na.value = "white"  # Set color for NA values
+  )
 
 # Adjust the data series names for better readability
-long_data <- long_data %>%
+combined_data <- combined_data %>%
   mutate(`Data Series` = case_when(
     `Data Series` == "Miscellaneous Goods & Services" ~ "Miscellaneous\nGoods & Services",
     `Data Series` == "Household Durables & Services" ~ "Household Durables\n& Services",
@@ -148,16 +179,27 @@ long_data <- long_data %>%
   ))
 
 
+# Generate the x-axis breaks and labels to include January, July, and "Overall_Avg" for each year
+x_breaks <- combined_data %>%
+  filter(Month %in% c("Jan", "Jul", "Overall_Avg", "Gap")) %>%
+  mutate(Year_Month_Index = paste(Year, sprintf("%02d", Month_Index), sep = "-")) %>%
+  distinct(Year_Month_Index, .keep_all = TRUE) %>%
+  arrange(Year, Month_Index) %>%
+  pull(Year_Month_Index)
 
-# Define custom color scale
-color_scale <- scale_fill_gradientn(
-   colors = c("#003f5c","#2f4b7c","#03b0f0", "#89d9fa", "#fee400", "#f7801c", "#bb1211", "#7a0c0a", "#440606"),
-  #colors = c("#03b0f0", "#89d9fa", "#fee400", "#f7801c", "#bb1211"),
-  values = scales::rescale(c(min(long_data$Percent_Change, na.rm = TRUE), -3, 0, 3, 6, 9, 12, max(long_data$Percent_Change, na.rm = TRUE))),  # Define breakpoints dynamically
-  limits = c(min(long_data$Percent_Change, na.rm = TRUE), max(long_data$Percent_Change, na.rm = TRUE)),  # Dynamic limits
-  breaks = seq(floor(min(long_data$Percent_Change, na.rm = TRUE)), ceiling(max(long_data$Percent_Change, na.rm = TRUE)), by = 3),  # Adjust breaks dynamically
-  labels = as.character(seq(floor(min(long_data$Percent_Change, na.rm = TRUE)), ceiling(max(long_data$Percent_Change, na.rm = TRUE)), by = 3))  # Adjust labels dynamically
-)
+x_labels <- combined_data %>%
+  filter(Month %in% c("Jan", "Jul", "Overall_Avg", "Gap")) %>%
+  mutate(Year_Month_Index = paste(Year, sprintf("%02d", Month_Index), sep = "-")) %>%
+  distinct(Year_Month_Index, .keep_all = TRUE) %>%
+  arrange(Year, Month_Index) %>%
+  mutate(Label = case_when(
+    Month == "Overall_Avg" ~ paste("Overall Avg"),
+    Month == "Gap" ~ "",
+    Month == "Jan" ~ paste("Jan", Year),
+    Month == "Jul" ~ paste("Jul", Year),
+    TRUE ~ month.abb[Month_Index]
+  )) %>%
+  pull(Label)
 ```
 
 
@@ -165,23 +207,36 @@ color_scale <- scale_fill_gradientn(
 
 ```{r}
 #| label: fig-ggplot
-#| fig-cap: "Revised visualization of inflation increase in Singapore by essentail items and year/month."
+#| fig-cap: "Revised visualization of inflation increase in Singapore by essential items and year/month."
 #| fig-width: 6.0
 #| fig-height: 5.8
 #| out-width: 100%
 
-# Generate heatmap with customized color and spacing
-ggplot(long_data, aes(x = Date, y = `Data Series`, fill = Percent_Change)) +
-  geom_tile(color = "white", size = 0.2) +  # Add spacing between tiles
-  geom_vline(xintercept = as.numeric(as.Date("2020-04-01")), color = "black", linetype = "solid", size = 0.8) +  # circuit breaker lockdown 
-  geom_vline(xintercept = as.numeric(as.Date("2023-02-13")), color = "black", linetype = "solid", size = 0.8) +  # fully release
+# Generate heatmap with customised color and spacing
+# Generate the heatmap including the average row and vertical lines for events
+heatmap_with_average <- ggplot(combined_data, aes(x = Year_Month_Index, y = `Data Series`, fill = Percent_Change)) +
+  geom_tile(color = "white", size = 0.5) +  # Add spacing between tiles
+   geom_vline(aes(xintercept = "2020-04", color = "Circuit Breaker"), linetype = "solid", size = 0.8, show.legend = TRUE) +  # Circuit breaker lockdown
+  geom_vline(aes(xintercept = "2022-02", color = "Russia-Ukraine War"), linetype = "solid", size = 0.8, show.legend = TRUE) +  # Russia-Ukraine War
+  geom_vline(aes(xintercept = "2023-02", color = "Fully Release"), linetype = "solid", size = 0.8, show.legend = TRUE) +  # Fully release
+  scale_x_discrete(breaks = x_breaks, labels = x_labels) +
   color_scale +
-  scale_x_date(
-    breaks = seq.Date(from = min(long_data$Date, na.rm = TRUE), to = max(long_data$Date, na.rm = TRUE), by = "6 months"),
-    date_labels = "%b %Y"
-  )+
-  labs(title = "Percent Change In Consumer Price Index (CPI) From 2019 to 2023",
-       x = NULL, y = NULL, fill = "Percent Change") +
+  scale_color_manual(
+    name = "Events",
+    values = c("Circuit Breaker" = "red", "Fully Release" = "#006400", "Russia-Ukraine War" = "#CC5500"),
+    guide = guide_legend(
+      title.position = "top",
+      override.aes = list(
+        linetype = "solid",
+        size = 1,
+        color = c("red", "#006400", "#CC5500"),
+        keyheight = unit(1, "lines"),
+        keywidth = unit(1, "lines")
+      )
+    )
+  ) +
+  labs(title = "Percentage Change In Consumer Price Index (CPI) From 2019 to 2023",
+       x = NULL, y = NULL, fill = "Percentage Change") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   theme(plot.title = element_text(size = 12), 
@@ -190,9 +245,30 @@ ggplot(long_data, aes(x = Date, y = `Data Series`, fill = Percent_Change)) +
         legend.title = element_text(size = 10),
         legend.text = element_text(size = 10)) +
   theme(plot.margin = unit(c(0, 0, 0, 0), "cm")) +
-  theme(legend.position = "bottom") +
-  theme(legend.key.size = unit(1, "cm")) +
-  theme(legend.key.width = unit(1, "cm"))
+  theme(legend.position = "bottom",
+        legend.box = "horizontal",
+        legend.box.just = "top",
+        legend.title.align = 0.5,
+        legend.text.align = 0.5,
+        legend.key.size = unit(1, "cm"),
+        legend.key.width = unit(1, "cm")) +
+  guides(
+    fill = guide_colorbar(title.position = "top", barwidth = 10, barheight = 0.5),
+    color = guide_legend(
+      title.position = "top",
+      label.position = "bottom",
+      override.aes = list(
+        linetype = "solid",
+        size = 1,
+        color = c("red", "#006400", "#CC5500"),
+        keyheight = unit(2, "lines"),
+        keywidth = unit(1, "lines")
+      )
+    )
+  )
+
+# Display the heatmap with the average row and event lines
+print(heatmap_with_average)
 ```
 
 
