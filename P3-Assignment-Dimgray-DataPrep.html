@@ -8,7 +8,7 @@
 
 <meta name="author" content="Jared Teo, Nicholas Poh, Oliver Choy, WuJie, Nicole, Kurt">
 
-<title>Data Preparation</title>
+<title>Percent Change In Consumer Price Index (CPI) of year 2023</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -80,7 +80,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Data Preparation</h1>
+<h1 class="title">Percent Change In Consumer Price Index (CPI) of year 2023</h1>
+<p class="subtitle lead">Data Preparation</p>
 </div>
 
 
@@ -103,126 +104,301 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="required-packages" class="level1">
-<h1>Required Packages</h1>
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>This document contains the data engineering required to reconstruct and improve the plot by Straits times, shown in <a href="#fig-inf" class="quarto-xref">Figure&nbsp;1</a>, depicting the inflation rate of prices in Singapore in the year 2023.</p>
+<p>The code below requires the following packages:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RColorBrewer)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RColorBrewer)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">include_graphics</span>(<span class="st">"images/price_index.png"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-inf" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-inf-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/price_index.png" class="img-fluid figure-img" style="width:60.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-inf-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Heat map of inflationary impact on key itens over 2023, published by the Straits Times.
+</figcaption>
+</figure>
+</div>
+</div>
 </div>
 </section>
 <section id="read-data" class="level1">
 <h1>Read data</h1>
+<p>Straits Times based their visualization on data by the Department of Statistics Singapore, available in CSV format with each row representing the inflation rate of a specific item for each month starting from the year 1962 to the current year. The relevant columns for the visualization are the <code>Data Series</code> column, which contains the item name, and the columns for each month of the year, showing the inflation rate for the specific month.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the dataset</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"M212911.csv"</span>, <span class="at">skip =</span> <span class="dv">10</span>)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> dataset[<span class="dv">1</span><span class="sc">:</span><span class="dv">152</span>,]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the dataset</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"M212911.csv"</span>, <span class="at">skip =</span> <span class="dv">10</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> dataset[<span class="dv">1</span><span class="sc">:</span><span class="dv">152</span>, ]</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>dataset</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 152 × 749
+   `Data Series`          `2024 Apr` `2024 Mar` `2024 Feb` `2024 Jan` `2023 Dec`
+   &lt;chr&gt;                       &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;
+ 1 All Items                     2.7        2.7        3.4        2.9        3.7
+ 2 Food                          2.8        3          3.8        3.3        3.7
+ 3 Food Excl Food Servin…        0.6        0.9        3.2        2.2        2.5
+ 4 Bread &amp; Cereals               3.5        3.8        4.3        4.8        4.9
+ 5 Rice                          2.2        3.7        4          4.3        4.8
+ 6 Flour                        -0.8       -1.4        1.3       -1.6        6.7
+ 7 Bread                         3.8        4.3        5.5        6.7        6.1
+ 8 Noodles &amp; Pasta               0.7        1.5        2          2.6        1.2
+ 9 Biscuits &amp; Cookies            2.5        2          3.9        4.4        1.4
+10 Cakes &amp; Pastries              4.5        3.8        3.6        3.7        5.1
+# ℹ 142 more rows
+# ℹ 743 more variables: `2023 Nov` &lt;dbl&gt;, `2023 Oct` &lt;dbl&gt;, `2023 Sep` &lt;dbl&gt;,
+#   `2023 Aug` &lt;dbl&gt;, `2023 Jul` &lt;dbl&gt;, `2023 Jun` &lt;dbl&gt;, `2023 May` &lt;dbl&gt;,
+#   `2023 Apr` &lt;dbl&gt;, `2023 Mar` &lt;dbl&gt;, `2023 Feb` &lt;dbl&gt;, `2023 Jan` &lt;dbl&gt;,
+#   `2022 Dec` &lt;dbl&gt;, `2022 Nov` &lt;dbl&gt;, `2022 Oct` &lt;dbl&gt;, `2022 Sep` &lt;dbl&gt;,
+#   `2022 Aug` &lt;dbl&gt;, `2022 Jul` &lt;dbl&gt;, `2022 Jun` &lt;dbl&gt;, `2022 May` &lt;dbl&gt;,
+#   `2022 Apr` &lt;dbl&gt;, `2022 Mar` &lt;dbl&gt;, `2022 Feb` &lt;dbl&gt;, `2022 Jan` &lt;dbl&gt;, …</code></pre>
+</div>
 </div>
 </section>
 <section id="preprocess-data" class="level1">
 <h1>Preprocess Data</h1>
+<p>For the data preprocessing stage, we will convert the relevant columns to numeric and filter the data to only include the months from the year 2019 to 2023. In addition, we also filter the item relevant to the data visualisation as depicted in <a href="#fig-inf" class="quarto-xref">Figure&nbsp;1</a>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert relevant columns to numeric</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> dataset <span class="sc">%&gt;%</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">matches</span>(<span class="st">"^2019|^2020|^2021|^2022|^2023"</span>), <span class="sc">~</span> <span class="fu">as.numeric</span>(<span class="fu">as.character</span>(.))))</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>month_data <span class="ot">&lt;-</span> dataset <span class="sc">%&gt;%</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="st">`</span><span class="at">Data Series</span><span class="st">`</span> <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Food"</span>, <span class="st">"Food Excl Food Serving Services"</span>, <span class="st">"Clothing &amp; Footwear"</span>, <span class="st">"Housing &amp; Utilities"</span>, <span class="st">"Household Durables &amp; Services"</span>, <span class="st">"Health Care"</span>, <span class="st">"Transport"</span>, <span class="st">"Communication"</span>, <span class="st">"Recreation &amp; Culture"</span>, <span class="st">"Education"</span>, <span class="st">"Miscellaneous Goods &amp; Services"</span>, <span class="st">"All Items"</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="st">`</span><span class="at">Data Series</span><span class="st">`</span>, <span class="fu">matches</span>(<span class="st">"^2019|^2020|^2021|^2022|^2023"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert relevant columns to numeric</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> dataset <span class="sc">|&gt;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">matches</span>(<span class="st">"^2019|^2020|^2021|^2022|^2023"</span>),</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>                <span class="sc">~</span> <span class="fu">as.numeric</span>(<span class="fu">as.character</span>(.))))</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>month_data <span class="ot">&lt;-</span> dataset <span class="sc">|&gt;</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="st">`</span><span class="at">Data Series</span><span class="st">`</span> <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Food"</span>, <span class="st">"Food Excl Food Serving Services"</span>,</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>                              <span class="st">"Clothing &amp; Footwear"</span>, <span class="st">"Housing &amp; Utilities"</span>,</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>                              <span class="st">"Household Durables &amp; Services"</span>, <span class="st">"Health Care"</span>,</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>                              <span class="st">"Transport"</span>, <span class="st">"Communication"</span>,</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>                              <span class="st">"Recreation &amp; Culture"</span>, <span class="st">"Education"</span>,</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>                              <span class="st">"Miscellaneous Goods &amp; Services"</span>, <span class="st">"All Items"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="st">`</span><span class="at">Data Series</span><span class="st">`</span>, <span class="fu">matches</span>(<span class="st">"^2019|^2020|^2021|^2022|^2023"</span>))</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>month_data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 12 × 61
+   `Data Series`          `2023 Dec` `2023 Nov` `2023 Oct` `2023 Sep` `2023 Aug`
+   &lt;chr&gt;                       &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;
+ 1 All Items                     3.7        3.6        4.7        4.1        4  
+ 2 Food                          3.7        4          4.1        4.3        4.8
+ 3 Food Excl Food Servin…        2.5        3.5        3.4        3.5        4.4
+ 4 Clothing &amp; Footwear          -1         -0.5       -0.1       -1.7       -0.5
+ 5 Housing &amp; Utilities           3.8        3.8        3.9        3.7        3.8
+ 6 Household Durables &amp; …        1.5        1          1.3        1.5        1.5
+ 7 Health Care                   5.1        5.1        5.2        4.5        4.3
+ 8 Transport                     3.9        2.8        8.4        6.3        4.8
+ 9 Communication                 3.9        4          3.6        3.6        2.2
+10 Recreation &amp; Culture          6.3        5.6        5.8        4.3        5.1
+11 Education                     2.6        2.7        2.7        2.4        2.6
+12 Miscellaneous Goods &amp;…        2.3        2.8        3.4        2.6        4.2
+# ℹ 55 more variables: `2023 Jul` &lt;dbl&gt;, `2023 Jun` &lt;dbl&gt;, `2023 May` &lt;dbl&gt;,
+#   `2023 Apr` &lt;dbl&gt;, `2023 Mar` &lt;dbl&gt;, `2023 Feb` &lt;dbl&gt;, `2023 Jan` &lt;dbl&gt;,
+#   `2022 Dec` &lt;dbl&gt;, `2022 Nov` &lt;dbl&gt;, `2022 Oct` &lt;dbl&gt;, `2022 Sep` &lt;dbl&gt;,
+#   `2022 Aug` &lt;dbl&gt;, `2022 Jul` &lt;dbl&gt;, `2022 Jun` &lt;dbl&gt;, `2022 May` &lt;dbl&gt;,
+#   `2022 Apr` &lt;dbl&gt;, `2022 Mar` &lt;dbl&gt;, `2022 Feb` &lt;dbl&gt;, `2022 Jan` &lt;dbl&gt;,
+#   `2021 Dec` &lt;dbl&gt;, `2021 Nov` &lt;dbl&gt;, `2021 Oct` &lt;dbl&gt;, `2021 Sep` &lt;dbl&gt;,
+#   `2021 Aug` &lt;dbl&gt;, `2021 Jul` &lt;dbl&gt;, `2021 Jun` &lt;dbl&gt;, `2021 May` &lt;dbl&gt;, …</code></pre>
+</div>
 </div>
 </section>
 <section id="pivot-longer" class="level1">
 <h1>Pivot Longer</h1>
+<p>Next, we will pivot the data longer to facilitate the generation of the heatmap. We will also calculate the overall average for each data series from 2019 to 2023.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Pivot longer for heatmap generation</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>long_data <span class="ot">&lt;-</span> month_data <span class="sc">%&gt;%</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">matches</span>(<span class="st">"^2019|^2020|^2021|^2022|^2023"</span>), </span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">"Year_Month"</span>, <span class="at">values_to =</span> <span class="st">"Percent_Change"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">separate</span>(Year_Month, <span class="at">into =</span> <span class="fu">c</span>(<span class="st">"Year"</span>, <span class="st">"Month"</span>), <span class="at">sep =</span> <span class="st">" "</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Year =</span> <span class="fu">as.integer</span>(Year), </span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">Month =</span> <span class="fu">factor</span>(Month, <span class="at">levels =</span> <span class="fu">c</span>(month.abb, <span class="st">"Overall_Avg"</span>)),  <span class="co"># Add "Overall_Avg" as the 14th month</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">Month_Index =</span> <span class="fu">as.numeric</span>(<span class="fu">factor</span>(Month, <span class="at">levels =</span> <span class="fu">c</span>(month.abb, <span class="st">"Overall_Avg"</span>))),</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">Year_Month_Index =</span> <span class="fu">paste</span>(Year, <span class="fu">sprintf</span>(<span class="st">"%02d"</span>, Month_Index), <span class="at">sep =</span> <span class="st">"-"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Pivot longer for heatmap generation</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>long_data <span class="ot">&lt;-</span> month_data <span class="sc">|&gt;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">matches</span>(<span class="st">"^2019|^2020|^2021|^2022|^2023"</span>),</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">"Year_Month"</span>, <span class="at">values_to =</span> <span class="st">"Percent_Change"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">separate</span>(Year_Month, <span class="at">into =</span> <span class="fu">c</span>(<span class="st">"Year"</span>, <span class="st">"Month"</span>), <span class="at">sep =</span> <span class="st">" "</span>) <span class="sc">|&gt;</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Year =</span> <span class="fu">as.integer</span>(Year),</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>         <span class="co"># Add "Overall_Avg" as the 14th month</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">Month =</span> <span class="fu">factor</span>(Month, <span class="at">levels =</span> <span class="fu">c</span>(month.abb, <span class="st">"Overall_Avg"</span>)),</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">Month_Index =</span> <span class="fu">as.numeric</span>(<span class="fu">factor</span>(Month, <span class="at">levels =</span> <span class="fu">c</span>(month.abb,</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>                                                           <span class="st">"Overall_Avg"</span>))),</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>         <span class="at">Year_Month_Index =</span> <span class="fu">paste</span>(Year, <span class="fu">sprintf</span>(<span class="st">"%02d"</span>,</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>                                                Month_Index), <span class="at">sep =</span> <span class="st">"-"</span>))</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>long_data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 720 × 6
+   `Data Series`  Year Month Percent_Change Month_Index Year_Month_Index
+   &lt;chr&gt;         &lt;int&gt; &lt;fct&gt;          &lt;dbl&gt;       &lt;dbl&gt; &lt;chr&gt;           
+ 1 All Items      2023 Dec              3.7          12 2023-12         
+ 2 All Items      2023 Nov              3.6          11 2023-11         
+ 3 All Items      2023 Oct              4.7          10 2023-10         
+ 4 All Items      2023 Sep              4.1           9 2023-09         
+ 5 All Items      2023 Aug              4             8 2023-08         
+ 6 All Items      2023 Jul              4.1           7 2023-07         
+ 7 All Items      2023 Jun              4.5           6 2023-06         
+ 8 All Items      2023 May              5.1           5 2023-05         
+ 9 All Items      2023 Apr              5.7           4 2023-04         
+10 All Items      2023 Mar              5.5           3 2023-03         
+# ℹ 710 more rows</code></pre>
+</div>
 </div>
 </section>
 <section id="calculate-overall-averages" class="level1">
 <h1>Calculate Overall Averages</h1>
+<p>For the next step, we will calculate the overall average for each data series from 2019 to 2023. We will also add small gaps before and after the “Overall_Avg” data points to improve the visual separation.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate the overall average for each data series from 2019 to 2023</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>overall_averages <span class="ot">&lt;-</span> long_data <span class="sc">%&gt;%</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Year <span class="sc">&gt;=</span> <span class="dv">2019</span> <span class="sc">&amp;</span> Year <span class="sc">&lt;=</span> <span class="dv">2023</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(<span class="st">`</span><span class="at">Data Series</span><span class="st">`</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">Percent_Change =</span> <span class="fu">mean</span>(Percent_Change, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">.groups =</span> <span class="st">'drop'</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Year =</span> <span class="dv">2023</span>, <span class="at">Month =</span> <span class="st">"Overall_Avg"</span>, <span class="at">Month_Index =</span> <span class="dv">14</span>, <span class="at">Year_Month_Index =</span> <span class="st">"2023-14"</span>)  <span class="co"># Use month index 14 for "Overall_Avg"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate the overall average for each data series from 2019 to 2023</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>overall_averages <span class="ot">&lt;-</span> long_data <span class="sc">|&gt;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Year <span class="sc">&gt;=</span> <span class="dv">2019</span> <span class="sc">&amp;</span> Year <span class="sc">&lt;=</span> <span class="dv">2023</span>) <span class="sc">|&gt;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(<span class="st">`</span><span class="at">Data Series</span><span class="st">`</span>) <span class="sc">|&gt;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">Percent_Change =</span> <span class="fu">mean</span>(Percent_Change, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Year =</span> <span class="dv">2023</span>, <span class="at">Month =</span> <span class="st">"Overall_Avg"</span>, <span class="at">Month_Index =</span> <span class="dv">14</span>,</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">Year_Month_Index =</span> <span class="st">"2023-14"</span>)  <span class="co"># Use month index 14 for "Overall_Avg"</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>overall_averages</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 12 × 6
+   `Data Series`         Percent_Change  Year Month Month_Index Year_Month_Index
+   &lt;chr&gt;                          &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;           
+ 1 All Items                      2.72   2023 Over…          14 2023-14         
+ 2 Clothing &amp; Footwear           -0.932  2023 Over…          14 2023-14         
+ 3 Communication                  0.18   2023 Over…          14 2023-14         
+ 4 Education                      1.57   2023 Over…          14 2023-14         
+ 5 Food                           3.19   2023 Over…          14 2023-14         
+ 6 Food Excl Food Servi…          3.23   2023 Over…          14 2023-14         
+ 7 Health Care                    1.48   2023 Over…          14 2023-14         
+ 8 Household Durables &amp;…          1.29   2023 Over…          14 2023-14         
+ 9 Housing &amp; Utilities            1.94   2023 Over…          14 2023-14         
+10 Miscellaneous Goods …          0.442  2023 Over…          14 2023-14         
+11 Recreation &amp; Culture           2.15   2023 Over…          14 2023-14         
+12 Transport                      6.35   2023 Over…          14 2023-14         </code></pre>
+</div>
 </div>
 </section>
 <section id="add-gaps" class="level1">
 <h1>Add Gaps</h1>
+<p>Next, we will add a small gap before and after the “Overall_Avg” data points to improve the visual separation.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Add a small gap before and after "Overall_Avg"</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>gap_data_before_avg <span class="ot">&lt;-</span> overall_averages <span class="sc">%&gt;%</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month =</span> <span class="st">"Gap"</span>, <span class="at">Month_Index =</span> <span class="dv">13</span>, <span class="at">Year_Month_Index =</span> <span class="st">"2023-13"</span>, <span class="at">Percent_Change =</span> <span class="cn">NA</span>)</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>gap_data_after_avg <span class="ot">&lt;-</span> overall_averages <span class="sc">%&gt;%</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month =</span> <span class="st">"Gap"</span>, <span class="at">Month_Index =</span> <span class="dv">15</span>, <span class="at">Year_Month_Index =</span> <span class="st">"2023-15"</span>, <span class="at">Percent_Change =</span> <span class="cn">NA</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Add a small gap before and after "Overall_Avg"</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>gap_data_before_avg <span class="ot">&lt;-</span> overall_averages <span class="sc">|&gt;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month =</span> <span class="st">"Gap"</span>, <span class="at">Month_Index =</span> <span class="dv">13</span>, <span class="at">Year_Month_Index =</span> <span class="st">"2023-13"</span>,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">Percent_Change =</span> <span class="cn">NA</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>gap_data_after_avg <span class="ot">&lt;-</span> overall_averages <span class="sc">|&gt;</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month =</span> <span class="st">"Gap"</span>, <span class="at">Month_Index =</span> <span class="dv">15</span>, <span class="at">Year_Month_Index =</span> <span class="st">"2023-15"</span>,</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">Percent_Change =</span> <span class="cn">NA</span>)</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>gap_data_after_avg</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 12 × 6
+   `Data Series`         Percent_Change  Year Month Month_Index Year_Month_Index
+   &lt;chr&gt;                 &lt;lgl&gt;          &lt;dbl&gt; &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;           
+ 1 All Items             NA              2023 Gap            15 2023-15         
+ 2 Clothing &amp; Footwear   NA              2023 Gap            15 2023-15         
+ 3 Communication         NA              2023 Gap            15 2023-15         
+ 4 Education             NA              2023 Gap            15 2023-15         
+ 5 Food                  NA              2023 Gap            15 2023-15         
+ 6 Food Excl Food Servi… NA              2023 Gap            15 2023-15         
+ 7 Health Care           NA              2023 Gap            15 2023-15         
+ 8 Household Durables &amp;… NA              2023 Gap            15 2023-15         
+ 9 Housing &amp; Utilities   NA              2023 Gap            15 2023-15         
+10 Miscellaneous Goods … NA              2023 Gap            15 2023-15         
+11 Recreation &amp; Culture  NA              2023 Gap            15 2023-15         
+12 Transport             NA              2023 Gap            15 2023-15         </code></pre>
+</div>
 </div>
 </section>
 <section id="color-scale" class="level1">
 <h1>Color Scale</h1>
+<p>Next, we will define a custom color scale for the heatmap based on the percentage change values. The color scale will be based on the RdYlBu palette with 9 colors in reverse order, and the breaks and labels will be adjusted dynamically based on the data.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine the original data with the overall averages and the gaps</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>combined_data <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(long_data, overall_averages, gap_data_before_avg, gap_data_after_avg) <span class="sc">%&gt;%</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(Year, Month_Index)</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>color_scale <span class="ot">&lt;-</span> <span class="fu">scale_fill_gradientn</span>(</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">colors =</span> <span class="fu">rev</span>(<span class="fu">brewer.pal</span>(<span class="dv">9</span>, <span class="st">"RdYlBu"</span>)),  <span class="co"># Use the RdYlBu palette with 9 colors in reverse order</span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">values =</span> scales<span class="sc">::</span><span class="fu">rescale</span>(<span class="fu">c</span>(<span class="fu">min</span>(combined_data<span class="sc">$</span>Percent_Change, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="sc">-</span><span class="dv">3</span>, <span class="dv">0</span>, <span class="dv">3</span>, <span class="dv">6</span>, <span class="dv">9</span>, <span class="dv">12</span>, <span class="fu">max</span>(combined_data<span class="sc">$</span>Percent_Change, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))),  <span class="co"># Define breakpoints dynamically</span></span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">limits =</span> <span class="fu">c</span>(<span class="fu">min</span>(combined_data<span class="sc">$</span>Percent_Change, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="fu">max</span>(combined_data<span class="sc">$</span>Percent_Change, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)),  <span class="co"># Dynamic limits</span></span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="fu">floor</span>(<span class="fu">min</span>(combined_data<span class="sc">$</span>Percent_Change, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)), <span class="fu">ceiling</span>(<span class="fu">max</span>(combined_data<span class="sc">$</span>Percent_Change, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)), <span class="at">by =</span> <span class="dv">3</span>),  <span class="co"># Adjust breaks dynamically</span></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">labels =</span> <span class="fu">as.character</span>(<span class="fu">seq</span>(<span class="fu">floor</span>(<span class="fu">min</span>(combined_data<span class="sc">$</span>Percent_Change, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)), <span class="fu">ceiling</span>(<span class="fu">max</span>(combined_data<span class="sc">$</span>Percent_Change, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)), <span class="at">by =</span> <span class="dv">3</span>)),  <span class="co"># Adjust labels dynamically</span></span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">na.value =</span> <span class="st">"white"</span>  <span class="co"># Set color for NA values</span></span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine the original data with the overall averages and the gaps</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>combined_data <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(long_data, overall_averages,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>                           gap_data_before_avg, gap_data_after_avg) <span class="sc">|&gt;</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(Year, Month_Index)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>color_scale <span class="ot">&lt;-</span> <span class="fu">scale_fill_gradientn</span>(</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Use the RdYlBu palette with 9 colors in reverse order</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">colors =</span> <span class="fu">rev</span>(<span class="fu">brewer.pal</span>(<span class="dv">9</span>, <span class="st">"RdYlBu"</span>)),</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">values =</span> scales<span class="sc">::</span><span class="fu">rescale</span>(<span class="fu">c</span>(<span class="fu">min</span>(combined_data<span class="sc">$</span>Percent_Change, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>                             <span class="sc">-</span><span class="dv">3</span>, <span class="dv">0</span>, <span class="dv">3</span>, <span class="dv">6</span>, <span class="dv">9</span>, <span class="dv">12</span>,</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>                             <span class="fu">max</span>(combined_data<span class="sc">$</span>Percent_Change, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))),</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Define breakpoints dynamically</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">limits =</span> <span class="fu">c</span>(<span class="fu">min</span>(combined_data<span class="sc">$</span>Percent_Change, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>             <span class="fu">max</span>(combined_data<span class="sc">$</span>Percent_Change, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)),</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="fu">floor</span>(<span class="fu">min</span>(combined_data<span class="sc">$</span>Percent_Change, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)),</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>               <span class="fu">ceiling</span>(<span class="fu">max</span>(combined_data<span class="sc">$</span>Percent_Change, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)),</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>               <span class="at">by =</span> <span class="dv">3</span>),  <span class="co"># Adjust breaks dynamically</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">labels =</span> <span class="fu">as.character</span>(<span class="fu">seq</span>(<span class="fu">floor</span>(<span class="fu">min</span>(combined_data<span class="sc">$</span>Percent_Change,</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>                                      <span class="at">na.rm =</span> <span class="cn">TRUE</span>)),</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>                            <span class="fu">ceiling</span>(<span class="fu">max</span>(combined_data<span class="sc">$</span>Percent_Change,</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">na.rm =</span> <span class="cn">TRUE</span>)),</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>                            <span class="at">by =</span> <span class="dv">3</span>)),  <span class="co"># Adjust labels dynamically</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">na.value =</span> <span class="st">"white"</span> <span class="co"># Set color for NA values</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="adjust-data-series-names" class="level1">
 <h1>Adjust Data Series Names</h1>
+<p>Next, we will adjust the data series names for better readability in the heatmap.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Adjust the data series names for better readability</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>combined_data <span class="ot">&lt;-</span> combined_data <span class="sc">%&gt;%</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">`</span><span class="at">Data Series</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">case_when</span>(</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">Data Series</span><span class="st">`</span> <span class="sc">==</span> <span class="st">"Miscellaneous Goods &amp; Services"</span> <span class="sc">~</span> <span class="st">"Miscellaneous</span><span class="sc">\n</span><span class="st">Goods &amp; Services"</span>,</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">Data Series</span><span class="st">`</span> <span class="sc">==</span> <span class="st">"Household Durables &amp; Services"</span> <span class="sc">~</span> <span class="st">"Household Durables</span><span class="sc">\n</span><span class="st">&amp; Services"</span>,</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">Data Series</span><span class="st">`</span> <span class="sc">==</span> <span class="st">"Food Excl Food Serving Services"</span> <span class="sc">~</span> <span class="st">"Food Excl Food</span><span class="sc">\n</span><span class="st">Serving Services"</span>,</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> <span class="fu">as.character</span>(<span class="st">`</span><span class="at">Data Series</span><span class="st">`</span>)</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  ))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Adjust the data series names for better readability</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>combined_data <span class="ot">&lt;-</span> combined_data <span class="sc">|&gt;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">`</span><span class="at">Data Series</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">case_when</span>(</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">Data Series</span><span class="st">`</span> <span class="sc">==</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Miscellaneous Goods &amp; Services"</span> <span class="sc">~</span> <span class="st">"Miscellaneous</span><span class="sc">\n</span><span class="st">Goods &amp; Services"</span>,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">Data Series</span><span class="st">`</span> <span class="sc">==</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Household Durables &amp; Services"</span> <span class="sc">~</span> <span class="st">"Household Durables</span><span class="sc">\n</span><span class="st">&amp; Services"</span>,</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">Data Series</span><span class="st">`</span> <span class="sc">==</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Food Excl Food Serving Services"</span> <span class="sc">~</span> <span class="st">"Food Excl Food</span><span class="sc">\n</span><span class="st">Serving Services"</span>,</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> <span class="fu">as.character</span>(<span class="st">`</span><span class="at">Data Series</span><span class="st">`</span>)</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  ))</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>combined_data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 756 × 6
+   `Data Series`          Year Month Percent_Change Month_Index Year_Month_Index
+   &lt;chr&gt;                 &lt;dbl&gt; &lt;chr&gt;          &lt;dbl&gt;       &lt;dbl&gt; &lt;chr&gt;           
+ 1 "All Items"            2019 Jan              0.4           1 2019-01         
+ 2 "Food"                 2019 Jan              1.6           1 2019-01         
+ 3 "Food Excl Food\nSer…  2019 Jan              1.3           1 2019-01         
+ 4 "Clothing &amp; Footwear"  2019 Jan              3.1           1 2019-01         
+ 5 "Housing &amp; Utilities"  2019 Jan             -0.6           1 2019-01         
+ 6 "Household Durables\…  2019 Jan              0.8           1 2019-01         
+ 7 "Health Care"          2019 Jan              2             1 2019-01         
+ 8 "Transport"            2019 Jan             -2.2           1 2019-01         
+ 9 "Communication"        2019 Jan             -2.3           1 2019-01         
+10 "Recreation &amp; Cultur…  2019 Jan              1             1 2019-01         
+# ℹ 746 more rows</code></pre>
+</div>
 </div>
 </section>
 <section id="generate-x-axis-breaks-and-labels" class="level1">
 <h1>Generate x-axis breaks and labels</h1>
+<p>We will generate the x-axis breaks and labels to include January, July, and “Overall_Avg” for each year to improve on the visibility of the heatmap.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate the x-axis breaks and labels to include January, July, and "Overall_Avg" for each year</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>x_breaks <span class="ot">&lt;-</span> combined_data <span class="sc">%&gt;%</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Month <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Jan"</span>, <span class="st">"Jul"</span>, <span class="st">"Overall_Avg"</span>, <span class="st">"Gap"</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Year_Month_Index =</span> <span class="fu">paste</span>(Year, <span class="fu">sprintf</span>(<span class="st">"%02d"</span>, Month_Index), <span class="at">sep =</span> <span class="st">"-"</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(Year_Month_Index, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(Year, Month_Index) <span class="sc">%&gt;%</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(Year_Month_Index)</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>x_labels <span class="ot">&lt;-</span> combined_data <span class="sc">%&gt;%</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Month <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Jan"</span>, <span class="st">"Jul"</span>, <span class="st">"Overall_Avg"</span>, <span class="st">"Gap"</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Year_Month_Index =</span> <span class="fu">paste</span>(Year, <span class="fu">sprintf</span>(<span class="st">"%02d"</span>, Month_Index), <span class="at">sep =</span> <span class="st">"-"</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(Year_Month_Index, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(Year, Month_Index) <span class="sc">%&gt;%</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Label =</span> <span class="fu">case_when</span>(</span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    Month <span class="sc">==</span> <span class="st">"Overall_Avg"</span> <span class="sc">~</span> <span class="fu">paste</span>(<span class="st">"Overall Avg"</span>),</span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    Month <span class="sc">==</span> <span class="st">"Gap"</span> <span class="sc">~</span> <span class="st">""</span>,</span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    Month <span class="sc">==</span> <span class="st">"Jan"</span> <span class="sc">~</span> <span class="fu">paste</span>(<span class="st">"Jan"</span>, Year),</span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    Month <span class="sc">==</span> <span class="st">"Jul"</span> <span class="sc">~</span> <span class="fu">paste</span>(<span class="st">"Jul"</span>, Year),</span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> month.abb[Month_Index]</span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>  )) <span class="sc">%&gt;%</span></span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(Label)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate the x-axis breaks and labels to include January, July, and</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co"># "Overall_Avg" for each year</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>x_breaks <span class="ot">&lt;-</span> combined_data <span class="sc">|&gt;</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Month <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Jan"</span>, <span class="st">"Jul"</span>, <span class="st">"Overall_Avg"</span>, <span class="st">"Gap"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Year_Month_Index =</span> <span class="fu">paste</span>(Year, <span class="fu">sprintf</span>(<span class="st">"%02d"</span>, Month_Index),</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">sep =</span> <span class="st">"-"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(Year_Month_Index, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(Year, Month_Index) <span class="sc">|&gt;</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(Year_Month_Index)</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>x_labels <span class="ot">&lt;-</span> combined_data <span class="sc">|&gt;</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Month <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Jan"</span>, <span class="st">"Jul"</span>, <span class="st">"Overall_Avg"</span>, <span class="st">"Gap"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Year_Month_Index =</span> <span class="fu">paste</span>(Year, <span class="fu">sprintf</span>(<span class="st">"%02d"</span>, Month_Index),</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">sep =</span> <span class="st">"-"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(Year_Month_Index, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(Year, Month_Index) <span class="sc">|&gt;</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Label =</span> <span class="fu">case_when</span>(</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>    Month <span class="sc">==</span> <span class="st">"Overall_Avg"</span> <span class="sc">~</span> <span class="fu">paste</span>(<span class="st">"Overall Avg"</span>),</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>    Month <span class="sc">==</span> <span class="st">"Gap"</span> <span class="sc">~</span> <span class="st">""</span>,</span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>    Month <span class="sc">==</span> <span class="st">"Jan"</span> <span class="sc">~</span> <span class="fu">paste</span>(<span class="st">"Jan"</span>, Year),</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>    Month <span class="sc">==</span> <span class="st">"Jul"</span> <span class="sc">~</span> <span class="fu">paste</span>(<span class="st">"Jul"</span>, Year),</span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> month.abb[Month_Index]</span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>  )) <span class="sc">|&gt;</span></span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(Label)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 

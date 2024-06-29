@@ -42,8 +42,9 @@ Economists stated that the inflation in 2023 was largely from external factors s
 # Previous Visualization
 
 ```{r}
-#| label: fig-wsj-on-poster
-#| fig-cap: "Heat map of inflationary impact on key itens over 2023, published by the
+#| label: fig-inf-on-poster
+#| fig-cap: "Heat map of inflationary impact on key itens over 2023,
+#| published by the
 #|   Straits Times."
 #| out-width: 60%
 
@@ -69,7 +70,7 @@ include_graphics("images/price_index.png")
 5. Utilize diverging palettes to clearly indicate positive and negative percentage changes in the CPI.
 6. Incorporate data for the month of December to compute the overall annual average, as December may show significant changes compared to January to November.
 7. Add a source note to the plot, allowing readers to easily reference the data source.
-1.  
+1.  Rename the time axis label, showing both the month and the year (e.g., Jan 2019, Jul 2019).
 1.  
 [^colorbrewer]: <https://colorbrewer2.org/#type=sequential&scheme=Reds&n=5>
     
@@ -106,7 +107,9 @@ We used the Quarto publication framework and the R programming language, along w
 #| label: fig-ggplot
 #| message: false
 #| warning: false
-#| fig-cap: "Revised visualization of inflation increase in Singapore by essential items and year/month."
+#| fig-cap: "Revised visualization of
+#|  inflation increase in Singapore by
+#|  essential items and year/month."
 #| fig-width: 6.0
 #| fig-height: 5.8
 #| out-width: 100%
@@ -114,16 +117,26 @@ We used the Quarto publication framework and the R programming language, along w
 
 # Generate heatmap with customised color and spacing
 # Generate the heatmap including the average row and vertical lines for events
-heatmap_with_average <- ggplot(combined_data, aes(x = Year_Month_Index, y = `Data Series`, fill = Percent_Change)) +
+heatmap_with_average <- ggplot(combined_data, aes(x = Year_Month_Index,
+                                                  y = `Data Series`,
+                                                  fill = Percent_Change)) +
   geom_tile(color = "white", size = 0.5) +  # Add spacing between tiles
-   geom_vline(aes(xintercept = "2020-04", color = "Circuit Breaker"), linetype = "solid", size = 0.8, show.legend = TRUE) +  # Circuit breaker lockdown
-  geom_vline(aes(xintercept = "2022-02", color = "Russia-Ukraine War"), linetype = "solid", size = 0.8, show.legend = TRUE) +  # Russia-Ukraine War
-  geom_vline(aes(xintercept = "2023-02", color = "Fully Release"), linetype = "solid", size = 0.8, show.legend = TRUE) +  # Fully release
+  geom_vline(aes(xintercept = "2020-04", color = "Circuit Breaker"),
+             linetype = "solid", size = 0.8,
+             show.legend = TRUE) +  # Circuit breaker lockdown
+  geom_vline(aes(xintercept = "2022-02", color = "Russia-Ukraine War"),
+             linetype = "solid", size = 0.8,
+             show.legend = TRUE) +  # Russia-Ukraine War
+  geom_vline(aes(xintercept = "2023-02", color = "Fully Release"),
+             linetype = "solid", size = 0.8,
+             show.legend = TRUE) +  # Fully release
   scale_x_discrete(breaks = x_breaks, labels = x_labels) +
   color_scale +
   scale_color_manual(
     name = "Events",
-    values = c("Circuit Breaker" = "red", "Fully Release" = "#006400", "Russia-Ukraine War" = "#CC5500"),
+    values = c("Circuit Breaker" = "red",
+               "Fully Release" = "#006400",
+               "Russia-Ukraine War" = "#CC5500"),
     guide = guide_legend(
       title.position = "top",
       override.aes = list(
@@ -135,13 +148,14 @@ heatmap_with_average <- ggplot(combined_data, aes(x = Year_Month_Index, y = `Dat
       )
     )
   ) +
-  labs(title = "Percentage Change In Consumer Price Index (CPI) From 2019 to 2023",
+  labs(title = "Percentage Change In Consumer Price Index (CPI)
+       From 2019 to 2023",
        x = NULL, y = NULL, fill = "Percentage Change") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  theme(plot.title = element_text(size = 12), 
-        axis.text.x = element_text(size = 10), 
-        axis.text.y = element_text(size = 10, margin = margin(0, 0, 0, 20)), 
+  theme(plot.title = element_text(size = 12),
+        axis.text.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10, margin = margin(0, 0, 0, 20)),
         legend.title = element_text(size = 10),
         legend.text = element_text(size = 10)) +
   theme(plot.margin = unit(c(0, 0, 0, 0), "cm")) +
@@ -153,7 +167,8 @@ heatmap_with_average <- ggplot(combined_data, aes(x = Year_Month_Index, y = `Dat
         legend.key.size = unit(1, "cm"),
         legend.key.width = unit(1, "cm")) +
   guides(
-    fill = guide_colorbar(title.position = "top", barwidth = 10, barheight = 0.5),
+    fill = guide_colorbar(title.position = "top", barwidth = 10,
+                          barheight = 0.5),
     color = guide_legend(
       title.position = "top",
       label.position = "bottom",
