@@ -7,7 +7,7 @@ format:
     departments: "Information and Communication Technologies"
     institution-logo: "./images/sit-logo.png"
     footer-text: "Information Visualisation 2024"
-    footer-emails: "2101720@sit.singaporetech.edu.sg, *insert email here*"
+    footer-emails: "2101720@sit.singaporetech.edu.sg"
 
 execute:
   echo: false
@@ -29,9 +29,8 @@ source("P3-Assignment-Dimgray-DataPrep.R")
 
 # Introduction
 
-Inflation in Singapore has moderated over 2023, prices are still above pre-pandemic levels and expected to remain elevated in 2024 after the 7 per cent rise in public transport fares, a second round of Goods and Services Tax (GST) hike and carbon tax adjustments kick in.[^straitstimes].The average price increase in 2023 ranged between 2 per cent for household durables and services, and just over 6 per cent for food, transport, recreation and cultures. Further more, there are 10 items that have, on average, seen double-digit price increases in 2023.[^straitstimes]
+Inflation in Singapore has moderated over 2023, prices are still above pre-pandemic levels and expected to remain elevated in 2024 after the 7 per cent rise in public transport fares, a second round of Goods and Services Tax (GST) hike and carbon tax adjustments kick in.The average price increase in 2023 ranged between 2 per cent for household durables and services, and just over 6 per cent for food, transport, recreation and cultures. Further more, there are 10 items that have, on average, seen double-digit price increases in 2023.
 
-[^straitstimes]: <https://www.straitstimes.com/business/prices-in-s-pore-seen-moderating-but-likely-to-remain-above-pandemic-levels-in-2024>
 
 Economists stated that the inflation in 2023 was largely from external factors such as the the reopening of economies, the impact of the Ukraine-Russia war and the post-Covid-19 supply chain disruption and restructuring. The economists, however, are not concerned due to the central bank's strong Singapore dollar policy to help manage imported inflation. This would help keep the incoming price increases manageable. Overall, however, the recent GST hike and rise in consumer prices will affect individuals from different income groups. Even with the government's support packages, the lower- to middle-income are expected to make some adjustments to their lifestyles. [^straitstimes]
 
@@ -46,19 +45,20 @@ Economists stated that the inflation in 2023 was largely from external factors s
 #| fig-cap: "Heat map of inflationary impact on key itens over 2023,
 #| published by the
 #|   Straits Times."
-#| out-width: 60%
+#| out-width: 70%
 
 include_graphics("images/price_index.png")
 ```
 
 [^straitstimes]: <https://www.straitstimes.com/business/prices-in-s-pore-seen-moderating-but-likely-to-remain-above-pandemic-levels-in-2024>
 
+
 # Strengths
 
 *   The heat map effectively highlights the items and the month when inflation effects were most pronounced.
 *   The color legend provides a clear indication of the inflation rate for each item and month.
-*   The infotip provides additional information about the inflation rate for each item and month.
-
+*   The visualization is concise and easy to understand, making it suitable for a broad audience.
+*   The use of color gradients effectively conveys the magnitude of inflation changes.
 
 
 # Suggested Improvements 
@@ -67,11 +67,13 @@ include_graphics("images/price_index.png")
 2. Add more legend breaks and colors to enhance the contrast in percentage changes in the CPI.
 3. Show the trend over the past five years, rather than focusing solely on 2023.
 4. Include event breaklines to highlight changes before, during, and after the circuit breaker lockdown.
-5. Utilize diverging palettes to clearly indicate positive and negative percentage changes in the CPI.
+5. Utilize gradient palettes to clearly indicate positive and negative percentage changes in the CPI.[^colorbrewer]
 6. Incorporate data for the month of December to compute the overall annual average, as December may show significant changes compared to January to November.
 7. Add a source note to the plot, allowing readers to easily reference the data source.
-1.  Rename the time axis label, showing both the month and the year (e.g., Jan 2019, Jul 2019).
-1.  
+8. Rename the time axis label, showing both the month and the year (e.g., Jan 2019, Jul 2019).
+9. Include wider range in the legend to show the full range of percentage changes in the CPI.
+
+
 [^colorbrewer]: <https://colorbrewer2.org/#type=sequential&scheme=Reds&n=5>
     
     
@@ -93,7 +95,13 @@ We used the Quarto publication framework and the R programming language, along w
 
 *   *tidyverse* for data transformation, including *ggplot2* for visualization
     based on the Grammar of Graphics
-*   *lubridate* *insert description here*
+*   *knitr* for dynamic document generation
+*   *RColorBrewer* for color palettes
+
+\
+\
+\
+\
 
 
 ```{=typst}
@@ -189,9 +197,9 @@ heatmap_with_average
 
 # Further Suggestions for Interactivity
 
-
+If we were to make this visualization interactive, we could consider the following features. We could add tooltips to display the exact percentage change when hovering over each tile. These interactive features would enhance the user experience and provide more flexibility in exploring the data. 
 
 
 # Conclusion
 
-.
+We managed to improve the visualization by incorporating additional features such as event breaklines, a revised color scale, and better labelling of guides and annotations. These enhancements provide a more comprehensive view of the inflation changes in Singapore from 2019 to 2023. The revised visualization effectively conveys the magnitude and timing of inflationary impacts on essential items, making it more informative and engaging for a broad audience.

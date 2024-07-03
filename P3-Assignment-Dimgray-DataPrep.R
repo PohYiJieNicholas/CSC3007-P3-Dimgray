@@ -4,7 +4,6 @@
 #| warning: false
 
 library(tidyverse)
-library(lubridate)
 library(ggplot2)
 library(RColorBrewer)
 library(knitr)
