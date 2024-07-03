@@ -4,7 +4,7 @@ format:
   poster-typst: 
     size: "33x23" # Approximately A1
     poster-authors: "Jared Teo, Nicholas Poh, Oliver Choy, WuJie, Nicole, Kurt"
-    departments: "Information and Communication Technologies"
+    departments: "Computing Science"
     institution-logo: "./images/sit-logo.png"
     footer-text: "Information Visualisation 2024"
     footer-emails: "2101720@sit.singaporetech.edu.sg"
