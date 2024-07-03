@@ -1,9 +1,9 @@
 ---
-title: "Percent Change In Consumer Price Index (CPI) of year 2023"
+title: "Percent Change In Consumer Price Index (CPI) of Year 2023"
 format:
   poster-typst: 
     size: "33x23" # Approximately A1
-    poster-authors: "Jared Teo, Nicholas Poh, Oliver Choy, WuJie, Nicole, Kurt"
+    poster-authors: "Jared Teo, Nicholas Poh, Oliver Choy, Chen WuJie, Nicole Ng, Kurt Tan"
     departments: "Computing Science"
     institution-logo: "./images/sit-logo.png"
     footer-text: "Information Visualisation 2024"
@@ -38,7 +38,7 @@ Economists stated that the inflation in 2023 was largely from external factors s
 [^straitstimes]: <https://www.straitstimes.com/business/prices-in-s-pore-seen-moderating-but-likely-to-remain-above-pandemic-levels-in-2024>
 
 
-# Previous Visualization
+# Previous Visualisation
 
 ```{r}
 #| label: fig-inf-on-poster
@@ -57,8 +57,9 @@ include_graphics("images/price_index.png")
 
 *   The heat map effectively highlights the items and the month when inflation effects were most pronounced.
 *   The color legend provides a clear indication of the inflation rate for each item and month.
-*   The visualization is concise and easy to understand, making it suitable for a broad audience.
+*   The visualisation is concise and easy to understand, making it suitable for a broad audience.
 *   The use of color gradients effectively conveys the magnitude of inflation changes.
+*   The improved visualisation offers clearer and more detailed data representation, making it easier to understand complex information.
 
 
 # Suggested Improvements 
@@ -67,11 +68,11 @@ include_graphics("images/price_index.png")
 2. Add more legend breaks and colors to enhance the contrast in percentage changes in the CPI.
 3. Show the trend over the past five years, rather than focusing solely on 2023.
 4. Include event breaklines to highlight changes before, during, and after the circuit breaker lockdown.
-5. Utilize gradient palettes to clearly indicate positive and negative percentage changes in the CPI.[^colorbrewer]
-6. Incorporate data for the month of December to compute the overall annual average, as December may show significant changes compared to January to November.
+5. Utilise gradient palettes to clearly indicate positive and negative percentage changes in the CPI.[^colorbrewer]
+6. Incorporate data for the month of December to compute the overall annual average, as December may show significant changes as compared to January to November.
 7. Add a source note to the plot, allowing readers to easily reference the data source.
 8. Rename the time axis label, showing both the month and the year (e.g., Jan 2019, Jul 2019).
-9. Include wider range in the legend to show the full range of percentage changes in the CPI.
+9. Include a wider range in the legend to show the full range of percentage changes in the CPI.
 
 
 [^colorbrewer]: <https://colorbrewer2.org/#type=sequential&scheme=Reds&n=5>
@@ -82,18 +83,18 @@ include_graphics("images/price_index.png")
 
 ## Data
 
-*   Percent change in consumer price index over corresponding period of previous year, 2019 as base year, Annual.[^CPI_Base_Year_2019_Yearly] 
-*   Percent change in consumer price index over corresponding period of previous year, 2019 as base year, Monthly[^CPI_Base_Year_2019_Monthly] 
+*   Percent change in consumer price index over corresponding period of previous year, with 2019 as the base year, Monthly[^CPI_Base_Year_2019_Monthly] 
+*   Percent change in consumer price index over corresponding period of previous year, with 2019 as the base year, Annual.[^CPI_Base_Year_2019_Yearly] 
 
-[^CPI_Base_Year_2019_Yearly]: <https://tablebuilder.singstat.gov.sg/table/TS/M212941>
 [^CPI_Base_Year_2019_Monthly]: <https://tablebuilder.singstat.gov.sg/table/TS/M212911>
+[^CPI_Base_Year_2019_Yearly]: <https://tablebuilder.singstat.gov.sg/table/TS/M212941>
 
 
 ## Software
 
 We used the Quarto publication framework and the R programming language, along with the following third-party packages:
 
-*   *tidyverse* for data transformation, including *ggplot2* for visualization
+*   *tidyverse* for data transformation, including *ggplot2* for visualisation
     based on the Grammar of Graphics
 *   *knitr* for dynamic document generation
 *   *RColorBrewer* for color palettes
@@ -109,13 +110,13 @@ We used the Quarto publication framework and the R programming language, along w
 ```
 
 
-# Improved Visualization
+# Improved Visualisation
 
 ```{r}
 #| label: fig-ggplot
 #| message: false
 #| warning: false
-#| fig-cap: "Revised visualization of
+#| fig-cap: "Revised visualisation of
 #|  inflation increase in Singapore by
 #|  essential items and year/month."
 #| fig-width: 6.0
@@ -197,9 +198,9 @@ heatmap_with_average
 
 # Further Suggestions for Interactivity
 
-If we were to make this visualization interactive, we could consider the following features. We could add tooltips to display the exact percentage change when hovering over each tile. These interactive features would enhance the user experience and provide more flexibility in exploring the data. 
+To make the visualisation more interactive, we could consider adding the following features: tooltips to display the exact percentage change when hovering over each tile. These interactive features would enhance the user experience and provide more flexibility in exploring the data.
 
 
 # Conclusion
 
-We managed to improve the visualization by incorporating additional features such as event breaklines, a revised color scale, and better labelling of guides and annotations. These enhancements provide a more comprehensive view of the inflation changes in Singapore from 2019 to 2023. The revised visualization effectively conveys the magnitude and timing of inflationary impacts on essential items, making it more informative and engaging for a broad audience.
+To conclude, we managed to improve the visualisation by incorporating additional features such as event breaklines, a revised colour scale, and better labelling of the guides and annotations. These enhancements provide a more comprehensive view of the inflation changes in Singapore between 2019 and 2023. The revised visualisation effectively conveys the magnitude and timing of inflationary impacts on essential items, making it more informative and engaging for a broad audience.
