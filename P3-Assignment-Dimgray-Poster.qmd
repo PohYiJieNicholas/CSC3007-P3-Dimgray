@@ -29,10 +29,10 @@ source("P3-Assignment-Dimgray-DataPrep.R")
 
 # Introduction
 
-Inflation in Singapore has moderated over 2023, prices are still above pre-pandemic levels and expected to remain elevated in 2024 after the 7 per cent rise in public transport fares, a second round of Goods and Services Tax (GST) hike and carbon tax adjustments kick in.The average price increase in 2023 ranged between 2 per cent for household durables and services, and just over 6 per cent for food, transport, recreation and cultures. Further more, there are 10 items that have, on average, seen double-digit price increases in 2023.
+Inflation in Singapore has moderated over 2023. However, prices are still above pre-pandemic levels and expected to remain elevated in 2024 after the 7 per cent rise in public transport fares, a second round of Goods and Services Tax (GST) hike and carbon tax adjustments kick in.The average price increase in 2023 ranged between 2 per cent for household durables and services, and just over 6 per cent for food, transport, recreation and cultures. Furthermore, there are 10 items that have, on average, seen double-digit price increases in 2023.
 
 
-Economists stated that the inflation in 2023 was largely from external factors such as the the reopening of economies, the impact of the Ukraine-Russia war and the post-Covid-19 supply chain disruption and restructuring. The economists, however, are not concerned due to the central bank's strong Singapore dollar policy to help manage imported inflation. This would help keep the incoming price increases manageable. Overall, however, the recent GST hike and rise in consumer prices will affect individuals from different income groups. Even with the government's support packages, the lower- to middle-income are expected to make some adjustments to their lifestyles. [^straitstimes]
+Economists stated that the inflation in 2023 was largely due to external factors such as the the reopening of economies, the impact of the Ukraine-Russia war and the post-Covid-19 supply chain disruption and restructuring. The economists, however, are not concerned due to the central bank's strong Singapore dollar policy to help manage imported inflation. This would help keep the incoming price increases manageable. Overall, however, the recent GST hike and rise in consumer prices will affect individuals from different income groups. Even with the government's support packages, the lower- to middle-income are expected to make some adjustments to their lifestyles. [^straitstimes]
 
 
 [^straitstimes]: <https://www.straitstimes.com/business/prices-in-s-pore-seen-moderating-but-likely-to-remain-above-pandemic-levels-in-2024>
@@ -65,7 +65,7 @@ include_graphics("images/price_index.png")
 # Suggested Improvements 
 
 1. Increase the maximum and minimum values in the legend to 18 and -9, respectively, to accurately reflect the range of values in the dataset.
-2. Add more legend breaks and colors to enhance the contrast in percentage changes in the CPI.
+2. Add more legend breaks and colours to enhance the contrast in percentage changes in the CPI.
 3. Show the trend over the past five years, rather than focusing solely on 2023.
 4. Include event breaklines to highlight changes before, during, and after the circuit breaker lockdown.
 5. Utilise gradient palettes to clearly indicate positive and negative percentage changes in the CPI.[^colorbrewer]
@@ -124,7 +124,7 @@ We used the Quarto publication framework and the R programming language, along w
 #| out-width: 100%
 
 
-# Generate heatmap with customised color and spacing
+# Generate heatmap with customised colour and spacing
 # Generate the heatmap including the average row and vertical lines for events
 heatmap_with_average <- ggplot(combined_data, aes(x = Year_Month_Index,
                                                   y = `Data Series`,
